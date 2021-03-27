@@ -1,2 +1,4 @@
 .DS_store
 .env
+chordkit/__pycache__/*
+chordkits/tests/__pycache__/*
