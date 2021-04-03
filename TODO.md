@@ -1,2 +1,4 @@
 - [ ] Add pitch name to Hz etc. functionality under pitch_utils.py
-- [ ] plotChord
+- [x] plotChord
+- [ ] Figure out setup.py
+- [ ] pair_diss and pair_cons
