@@ -1,25 +1,15 @@
 import math
 from chordkit.hearing_models import cbw_volk as cbw, bark_zwicker as bark
+from chordkit.pair_constants import SETHARES_CONSTANTS as sc, AUDITORY_CONSTANTS as ac, pair_volume, pair_distance
 
-# Volume scale
-def vol_scale(v_x, v_ref, amp_type='MIN'):
-    if amp_type in ['PROD', 'PRODUCT']:
-        return v_x * v_ref
-    else:
-        return min([v_x, v_ref])
+
 
 # Returns the value of the Sethares "sensory dissonance" (roughness)
 # function at frequency x_hz with respect to ref_hz.
 # Based on Sethares 1997, as implemented in Giordano 2015.
 def sethares_roughness(x_hz, ref_hz, v_x, v_ref, amp_type='MIN', cutoff=False, original=False):
-    # Parameters fit by Sethares 1993. Reformulated version from Giordano 2015.
-    a = 3.51 # From http://sethares.engr.wisc.edu/comprog.html; paper has 3.
-    b = 5.75
-    s_star = 0.24
-    s1 = 0.0207 # From http://sethares.engr.wisc.edu/comprog.html; paper has 0.021
-    s2 = 18.96 # From http://sethares.engr.wisc.edu/comprog.html; paper has 19
-    s = s_star / (s1 * min([x_hz, ref_hz]) + s2)
-    v12 = vol_scale(v_x, v_ref, amp_type)
+    s = sc.s_star / (sc.s1 * min([x_hz, ref_hz]) + sc.s2)
+    v12 = pair_volume(v_x, v_ref, amp_type)
 
     # The following scaling factor is introduced to ensure that the maximum
     # value obtained by the pairwise roughness function is approximately 1.
@@ -27,7 +17,7 @@ def sethares_roughness(x_hz, ref_hz, v_x, v_ref, amp_type='MIN', cutoff=False, o
     # denominator is my additional modification.
     scaling = 5 / 0.8986
 
-    distance = abs(x_hz - ref_hz)
+    distance = pair_distance(x_hz, ref_hz)
 
     # Cutoff: Following Hutchinson and Knopoff 1978, cuts off the Sethares
     # roughness function at 1.2 CBW, which prevents too-remote partials from
@@ -35,17 +25,17 @@ def sethares_roughness(x_hz, ref_hz, v_x, v_ref, amp_type='MIN', cutoff=False, o
     # for larger intervals.)
     if cutoff:
         cbw_limit = 1.2 * cbw(max[x_hz, ref_hz]) / 2
-        if distance < 15 or distance >= cbw_limit:
-            scaling = 0
+        if distance < ac.slow_beat_limit or distance >= cbw_limit:
+            v12 = 0
 
     # Sethares' MATLAB implementation (but not the published paper)
     if original:
         scaling = 5
 
     try:
-        return v12 * scaling * (math.exp(-a*s*distance) - math.exp(-b*s*distance))
+        return v12 * scaling * (math.exp(-sc.a*s*distance) - math.exp(-sc.b*s*distance))
     except OverflowError:
-        print(f'Overflow in computing roughness: a == {a}, b == {b}, s == {s}, distance == {distance}')
+        print(f'Overflow in computing roughness: a == {sc.a}, b == {sc.b}, s == {s}, distance == {distance}')
 
 
 # Returns roughness contribution of two partials, based on an indicator

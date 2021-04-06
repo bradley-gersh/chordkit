@@ -1,5 +1,7 @@
 .DS_store
-src/chordkit/__pycache__/*
+chordkit/__pycache__/*
 tests/__pycache__/*
 .venv
 .env
+.pytest_cache
+.vscode/
