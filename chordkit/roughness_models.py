@@ -1,0 +1,116 @@
+import math
+import numpy as np
+from chordkit.hearing_models import cbw_volk as cbw, bark_zwicker as bark
+from chordkit.pair_constants import SETHARES_CONSTANTS as sc, AUDITORY_CONSTANTS as ac, pair_volume, pair_distance
+
+###################
+# PAIRWISE MODELS #
+###################
+
+# Different pairwise roughness evaluation functions. Each has the same signature
+# so that they can be called by the same line of code.
+
+# Returns the value of the Sethares "sensory dissonance" (roughness)
+# function at frequency x_hz with respect to ref_hz.
+# Based on Sethares 1997, as implemented in Giordano 2015.
+def sethares_roughness_pair(x_hz, ref_hz, v_x, v_ref, options = {
+    'amp_type': 'MIN', 'cutoff': False, 'original': False
+}):
+    s = sc.s_star / (sc.s1 * min([x_hz, ref_hz]) + sc.s2)
+    v12 = pair_volume(v_x, v_ref, options.amp_type)
+
+    # The following scaling factor is introduced to ensure that the maximum
+    # value obtained by the pairwise roughness function is approximately 1.
+    # The numerator comes from Sethares' MATLAB implementation; the
+    # denominator is my additional modification.
+    scaling = 5 / 0.8986
+
+    distance = pair_distance(x_hz, ref_hz)
+
+    # Cutoff: Following Hutchinson and Knopoff 1978, cuts off the Sethares
+    # roughness function at 1.2 CBW, which prevents too-remote partials from
+    # contributing to the final score. (Check whether this also prevents drift
+    # for larger intervals.)
+    if options.cutoff:
+        cbw_limit = 1.2 * cbw(max[x_hz, ref_hz]) / 2
+        if distance < ac.slow_beat_limit or distance >= cbw_limit:
+            v12 = 0
+
+    # Sethares' MATLAB implementation (but not the published paper)
+    if options.original:
+        scaling = 5
+
+    try:
+        return v12 * scaling * (math.exp(-sc.a*s*distance) - math.exp(-sc.b*s*distance))
+    except OverflowError:
+        print(f'Overflow in computing roughness: a == {sc.a}, b == {sc.b}, s == {s}, distance == {distance}')
+
+
+# Returns roughness contribution of two partials, based on an indicator
+# function on the critical bandwidth, scaled to the amplitude of the partial.
+def cbw_roughness_pair(x_hz, ref_hz, v_x, v_ref, options={ 'amp_type': 'MIN' }):
+    cbw_limit = cbw(max([x_hz, ref_hz])) / 2
+    distance = pair_distance(x_hz, ref_hz)
+
+    if distance >= 15 and distance < cbw_limit:
+        return pair_volume(v_x, v_ref, options.amp_type)
+    else:
+        return 0
+
+# From Bigand, Parncutt, and Lerdahl 1996. Note that the volumes are not used
+def parncutt_roughness_pair(x_hz, ref_hz, v_x, v_ref, options = {}):
+    # Parameters asserted in BPL 1996 paper
+    a = 0.25
+    i_factor = 2
+
+    x_bark = bark(x_hz)
+    ref_bark = bark(ref_hz)
+    distance = abs(x_bark - ref_bark)
+
+    if distance < 1.2:
+        return ((math.exp(1)/a) * distance * math.exp(-distance / a)) ** i_factor
+    else:
+        return 0
+
+###################
+# SUMMATION MODEL #
+###################
+
+# The following function is based on Sethares' 1993 model, which linearly sums
+# all pairwise contributions to roughness. It can use any of the other
+# pairwise roughness evaluation functions.
+def roughness_complex(
+    spectrum: pd.DataFrame,
+    function_type: str = 'sethares',
+    options = {
+        'amp_type': 'MIN', 'cutoff': False, 'original': False, 'rough_limit': 0.1
+    }
+):
+    n = len(spectrum['hz'])
+    rough_partials = []
+    rough_vals = np.zeros(n)
+
+    if function_type.lower() == 'sethares':
+        pair_assess = sethares_roughness_pair
+    elif function_type.lower() == 'cbw':
+        pair_assess = cbw_roughness_pair
+    elif function_type.lower() == 'parncutt':
+        pair_assess = parncutt_roughness_pair
+
+    # Assess all pairs for roughness
+    for i in range(n - 1):
+        for j in range(i + 1, n):
+            rough_vals[i][j] = pair_assess(
+                spectrum['hz'][i],
+                spectrum['hz'][j],
+                spectrum['amp'][i],
+                spectrum['amp'][j],
+                options
+            )
+            if rough_vals[i][j] > options.rough_limit:
+                rough_partials.append[(i, j)]
+
+    return {
+        'roughness': np.sum(rough_vals),
+        'rough_partials': rough_partials
+    }

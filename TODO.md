@@ -2,4 +2,6 @@
 - [x] plotChord
 - [ ] Figure out setup.py
 - [x] pair_diss
-- [ ] pair_cons
+- [x] pair_cons
+- [ ] Full dissonance graph
+- [ ] Full overlap graph

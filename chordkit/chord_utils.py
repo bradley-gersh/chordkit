@@ -1,4 +1,5 @@
 import pandas as pd
+import matplotlib.pyplot as plt
 import numpy as np
 
 
@@ -14,8 +15,9 @@ def make_timbre(fund_multiple: list or range, amp: list = 1):
     return timbre
 
 default_timbre = make_timbre(range(1, 13), [1/n for n in range(1, 13)])
+default_fund = 220
 
-def make_chord(chord_struct: list, chord_struct_type: str = 'ST_DIFF', timbre: pd.DataFrame = default_timbre, fund_hz: float = 220):
+def make_chord(chord_struct: list, chord_struct_type: str = 'ST_DIFF', timbre: pd.DataFrame = default_timbre, fund_hz: float = default_fund):
     chord = pd.DataFrame();
 
     # Reference tone for generating chord
@@ -48,3 +50,7 @@ def make_chord(chord_struct: list, chord_struct_type: str = 'ST_DIFF', timbre: p
         chord = chord.append(new_note, ignore_index = True)
 
     return chord.reindex(['hz', 'amp', 'note_id', 'fund_multiple'], axis=1).sort_values(by = 'hz', ignore_index = True)
+
+def plot_chord(chord: pd.DataFrame):
+    plt.stem(chord['hz'], chord['amp'])
+    plt.show()
