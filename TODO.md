@@ -5,3 +5,5 @@
 - [x] pair_cons
 - [ ] Full dissonance graph
 - [ ] Full overlap graph
+- [ ] Restyle roughness_model to use \*args \*\*kwargs
+- [ ] Implement crossterms_only in plot

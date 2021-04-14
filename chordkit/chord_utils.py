@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
-
+# Sample usage: make_timbre(range(1, 13))
 def make_timbre(fund_multiple: list or range, amp: list = 1):
     timbre = pd.DataFrame({
         'fund_multiple': list(fund_multiple),
@@ -17,11 +17,18 @@ def make_timbre(fund_multiple: list or range, amp: list = 1):
 default_timbre = make_timbre(range(1, 13), [1/n for n in range(1, 13)])
 default_fund = 220
 
-def make_chord(chord_struct: list, chord_struct_type: str = 'ST_DIFF', timbre: pd.DataFrame = default_timbre, fund_hz: float = default_fund):
-    chord = pd.DataFrame();
+# Sample usage: make_chord([0, 4, 7])
+def make_chord(
+    chord_struct: list,
+    chord_struct_type: str = 'ST_DIFF',
+    *,
+    timbre: pd.DataFrame = default_timbre,
+    fund_hz: float = default_fund
+):
+    chord = pd.DataFrame()
 
     # Reference tone for generating chord
-    ref_tone = timbre.copy();
+    ref_tone = timbre.copy()
     ref_tone['hz'] = ref_tone['fund_multiple']
     if fund_hz > 0:
         ref_tone['hz'] *= fund_hz
@@ -43,7 +50,7 @@ def make_chord(chord_struct: list, chord_struct_type: str = 'ST_DIFF', timbre: p
             raise ValueError('invalid chord structure type')
 
     # Generate chord from reference tone and chord structure
-    for idx, note in enumerate(chord_struct):
+    for (idx, note) in enumerate(chord_struct):
         new_note = ref_tone.copy()
         new_note['hz'] = new_note_hz(note)
         new_note['note_id'] = idx
@@ -51,6 +58,22 @@ def make_chord(chord_struct: list, chord_struct_type: str = 'ST_DIFF', timbre: p
 
     return chord.reindex(['hz', 'amp', 'note_id', 'fund_multiple'], axis=1).sort_values(by = 'hz', ignore_index = True)
 
+# The following only returns the updated frequencies from sliding a chord, which
+# is more efficient than creating a new chord data frame each time.
+def slide_timbre(position, timbre, *, chord_struct_type, fund_hz = 220):
+    if chord_struct_type.upper() == 'ST_DIFF':
+        return 2 ** (position / 12) * timbre['fund_multiple']
+    elif chord_struct_type.upper() == 'SCALE_FACTOR':
+        return position * timbre['fund_multiple']
+    elif chord_struct_type.upper() == 'HZ_SHIFT':
+        return fund_hz * timbre['fund_multiple'] + position
+    else:
+        raise ValueError('invalid chord structure type')
+
 def plot_chord(chord: pd.DataFrame):
     plt.stem(chord['hz'], chord['amp'])
+    plt.show()
+
+def plot_line(series):
+    plt.plot(series)
     plt.show()
