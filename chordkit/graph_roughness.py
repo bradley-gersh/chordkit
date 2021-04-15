@@ -35,7 +35,7 @@ def roughness_curve(
     # ref_chord = cu.make_chord(ref_chord_struct, chord_struct_type, timbre=ref_timbre, fund_hz=fund_hz)
     # new_test_timbre = test_timbre.copy()
 
-    roughness_vals = np.zeros(np.shape(slide_range))
+    roughness_vals = np.zeros(np.shape(transpose_range))
 
     # if chord_struct_type.upper() == 'HZ_SHIFT':
         # fund_hz = 0
