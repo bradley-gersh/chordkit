@@ -21,13 +21,28 @@ class Timbre:
 default_timbre = Timbre(range(1, 13), [1/n for n in range(1, 13)])
 default_fund = 220
 
+def sort_partials(partials: pd.DataFrame):
+    return partials.reindex(['hz', 'amp', 'note_id', 'fund_multiple'], axis=1).sort_values(by = 'hz', ignore_index = True)
+
 class Spectrum:
-    def __init__(self, timbre: Timbre, fund_hz: float = default_fund):
-        self.partials = timbre.copy()
-        self.fund_hz = fund_hz
-        self.partials['hz'] = self.partials['fund_multiple']
-        if fund_hz > 0:
-            self.partials['hz'] *= fund_hz
+    # Need to overload to merge two chords
+    def __init__(self, *args):
+    # def __init__(self, timbre: Timbre, fund_hz: float = default_fund):
+        if isinstance(args[0], Timbre):
+            self.partials = args[0].copy()
+            self.partials['hz'] = self.partials['fund_multiple']
+            if isinstance(args[1], float):
+                self.fund_hz = args[1]
+                if args[1] > 0:
+                    self.partials['hz'] *= fund_hz
+            else:
+                self.fund_hz = 0
+
+        # Constructor called with two ChordSpectrum or Spectrum objects: merges them
+        elif isinstance(args[0].partials, pd.DataFrame) and isinstance(args[1].partials, pd.DataFrame):
+            self.fund_hz = 0
+            self.partials = args[0].partials.append(args[1].partials, ignore_index = True)
+            self.partials = sort_partials(self.partials)
 
 class ChordSpectrum:
     def __init__(
@@ -52,7 +67,7 @@ class ChordSpectrum:
             new_tone.partials['note_id'] = idx
             self.partials = self.partials.append(new_tone.partials, ignore_index = True)
 
-        self.partials = self.partials.reindex(['hz', 'amp', 'note_id', 'fund_multiple'], axis=1).sort_values(by = 'hz', ignore_index = True)
+        self.partials = sort_partials(self.partials)
 
     # Generate a new note for the chord, based on the chord_struct_type
     def add_note_hz(self, note_hz):
@@ -70,16 +85,22 @@ class ChordSpectrum:
         else:
             raise ValueError('invalid chord structure type')
 
+    def set_fund_hz(self, new_fund_hz: float):
+        self.fund_hz = new_fund_hz
+        self.partials['hz'] = self.partials['fund_multiple'] * new_fund_hz
+
     # Update chord's frequency table to reflect a transposition
-    def transpose(self, position: float, position_type: str):
-        if position_type.upper() != self.struct_type.upper():
+    def transpose(self, position: float, transpose_type: str):
+        if transpose_type.upper() != self.struct_type.upper():
             Warning('chord structure type does not match transposition type')
 
-        if position_type.upper() == 'ST_DIFF':
-            self.partials['hz'] *= 2 ** (position / 12)
-        elif position_type.upper() == 'SCALE_FACTOR':
-            self.partials['hz'] *= position
-        elif position_type.upper() == 'HZ_SHIFT':
+        if transpose_type.upper() == 'ST_DIFF':
+            # self.partials['hz'] *= 2 ** (position / 12)
+            self.set_fund_hz(2 ** (position / 12) * self.fund_hz)
+        elif transpose_type.upper() == 'SCALE_FACTOR':
+            # self.partials['hz'] *= position
+            self.set_fund_hz(position * self.fund_hz)
+        elif transpose_type.upper() == 'HZ_SHIFT':
             self.partials['hz'] += position
         else:
             raise ValueError('invalid chord structure type')

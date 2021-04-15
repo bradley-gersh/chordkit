@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from chordkit.hearing_models import cbw_volk as cbw, bark_zwicker as bark
 from chordkit.pair_constants import SETHARES_CONSTANTS as sc, AUDITORY_CONSTANTS as ac, pair_volume, pair_distance
+from chordkit.chord_utils import Spectrum
 
 # This file contains both the individual pairwise models used for assessing the
 # roughness of partial pairs and the summing function that adds up all such
@@ -85,7 +86,7 @@ def parncutt_roughness_pair(x_hz, ref_hz, v_x, v_ref, options = {}):
 # all pairwise contributions to roughness. It can use any of the other
 # pairwise roughness evaluation functions.
 def roughness_complex(
-    spectrum: pd.DataFrame,
+    spectrum: Spectrum,
     function_type: str = 'SETHARES',
     amp_type: str = 'MIN',
     cutoff: bool = False,
@@ -94,7 +95,7 @@ def roughness_complex(
         'original': False
     }
 ):
-    n = len(spectrum['hz'])
+    n = len(spectrum.partials['hz'])
     rough_partials = []
     rough_vals = np.zeros((n, n))
 
@@ -109,10 +110,10 @@ def roughness_complex(
     for i in range(n - 1):
         for j in range(i + 1, n):
             rough_vals[i][j] = pair_assess(
-                spectrum['hz'][i],
-                spectrum['hz'][j],
-                spectrum['amp'][i],
-                spectrum['amp'][j],
+                spectrum.partials['hz'][i],
+                spectrum.partials['hz'][j],
+                spectrum.partials['amp'][i],
+                spectrum.partials['amp'][j],
                 options=options
             )
             if rough_vals[i][j] > rough_limit:
