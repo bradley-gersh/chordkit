@@ -16,10 +16,10 @@ class Timbre:
             self.partials['amp'] = amp
 
     def copy(self):
-        return Timbre(self.fund_multiple, self.amp)
+        return Timbre(list(self.partials['fund_multiple']), list(self.partials['amp']))
 
 default_timbre = Timbre(range(1, 13), [1/n for n in range(1, 13)])
-default_fund = 220
+default_fund = 220.0
 
 def sort_partials(partials: pd.DataFrame):
     return partials.reindex(['hz', 'amp', 'note_id', 'fund_multiple'], axis=1).sort_values(by = 'hz', ignore_index = True)
@@ -29,12 +29,12 @@ class Spectrum:
     def __init__(self, *args):
     # def __init__(self, timbre: Timbre, fund_hz: float = default_fund):
         if isinstance(args[0], Timbre):
-            self.partials = args[0].copy()
+            self.partials = args[0].partials.copy()
             self.partials['hz'] = self.partials['fund_multiple']
-            if isinstance(args[1], float):
-                self.fund_hz = args[1]
+            if isinstance(args[1], float) or isinstance(args[1], int):
+                self.fund_hz = float(args[1])
                 if args[1] > 0:
-                    self.partials['hz'] *= fund_hz
+                    self.partials['hz'] *= self.fund_hz
             else:
                 self.fund_hz = 0
 
@@ -63,7 +63,7 @@ class ChordSpectrum:
         # Generate chord from reference tone and chord structure
         for (idx, note) in enumerate(chord_struct):
             new_tone = Spectrum(timbre, fund_hz)
-            new_tone.partials['hz'] = self.add_note_hz(note)
+            # new_tone.partials['hz'] = self.add_note_hz(note)
             new_tone.partials['note_id'] = idx
             self.partials = self.partials.append(new_tone.partials, ignore_index = True)
 
@@ -112,7 +112,10 @@ class ChordSpectrum:
         plt.stem(self.partials['hz'], self.partials['amp'])
         plt.show()
 
-
+class TransposeDomain:
+    def __init__(self, low_bound, high_bound, steps, transpose_type):
+        self.domain = np.linspace(low_bound, high_bound, num=steps)
+        self.transpose_type = transpose_type
 
 # Sample usage: make_timbre(range(1, 13))
 # def make_timbre(fund_multiple: list or range, amp: list = 1):

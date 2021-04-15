@@ -1,5 +1,5 @@
 import unittest
-import chord_utils as cu
+import chordkit.chord_utils as cu
 import pandas as pd
 from pandas.testing import assert_frame_equal
 
