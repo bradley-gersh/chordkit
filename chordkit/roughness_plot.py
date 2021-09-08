@@ -47,7 +47,7 @@ def roughness_curve(
         # union = ref_chord.append(test_chord, ignore_index=True)
         union = MergedSpectrum(ref_chord, test_chord)
         # print(union.partials)
-        curr_roughness_val = (roughness_complex(union, function_type, options))['roughness']
+        curr_roughness_val = (roughness_complex(union, function_type, options=options))['roughness']
         roughness_vals[idx] = curr_roughness_val
 
     if plot:

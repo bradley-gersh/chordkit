@@ -4,6 +4,7 @@ import numpy as np
 from hearing_models import cbw_volk as cbw, bark_zwicker as bark
 from pair_constants import SETHARES_CONSTANTS as sc, AUDITORY_CONSTANTS as ac, pair_volume, pair_distance
 from chord_utils import MergedSpectrum
+from matplotlib import pyplot as plt
 
 # This file contains both the individual pairwise models used for assessing the
 # roughness of partial pairs and the summing function that adds up all such
@@ -23,9 +24,16 @@ def helmholtz_roughness_pair(x_hz, ref_hz, v_x, v_ref, *, p=1, options={}):
     bPrime1 = 1
     bPrime2 = 1
     beta = 0.01
+    # print(options)
+    true_ref = options['ref'][0]
+
+    if ref_hz != true_ref:
+        temp = x_hz
+        x_hz = ref_hz
+        ref_hz = temp
 
     delta = ((float(x_hz) / ref_hz) - 1) / 2
-    theta = 15.0 / ref_hz
+    theta = 15.0 / true_ref
 
     s = 4 * bPrime1 * bPrime2 * (beta ** 2) / (beta ** 2 + (2 * np.pi * delta) ** 2)
 
@@ -109,7 +117,8 @@ def roughness_complex(
     amp_type: str = 'MIN',
     cutoff: bool = False,
     rough_limit: float = 0.1,
-    options = {
+    *,
+    options={
         'original': False
     }
 ):
