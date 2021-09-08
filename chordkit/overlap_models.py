@@ -1,6 +1,6 @@
 import math
-from chordkit.hearing_models import cbw_volk as cbw, bark_zwicker as bar
-from chordkit.pair_constants import SETHARES_CONSTANTS as sc, AUDITORY_CONSTANTS as ac, pair_volume, pair_distance
+from hearing_models import cbw_volk as cbw, bark_zwicker as bar
+from pair_constants import SETHARES_CONSTANTS as sc, AUDITORY_CONSTANTS as ac, pair_volume, pair_distance
 
 # Returns overlap contribution of two partials, based on an indicator
 # function on the critical bandwidth, scaled to the amplitude of the partial.

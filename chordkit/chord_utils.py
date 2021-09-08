@@ -22,9 +22,9 @@ default_timbre = Timbre(range(1, 13), [1/n for n in range(1, 13)])
 default_fund = 220.0
 
 def sort_partials(partials: pd.DataFrame):
-    return partials.reindex(['hz', 'amp', 'note_id', 'fund_multiple'], axis=1).sort_values(by = 'hz', ignore_index = True)
+    return partials.reindex(['hz', 'amp', 'note_id', 'fund_multiple', 'hz_orig'], axis=1).sort_values(by = 'hz', ignore_index = True)
 
-class Spectrum:
+class MergedSpectrum:
     # Need to overload to merge two chords
     def __init__(self, *args):
     # def __init__(self, timbre: Timbre, fund_hz: float = default_fund):
@@ -38,7 +38,7 @@ class Spectrum:
             else:
                 self.fund_hz = 0
 
-        # Constructor called with two ChordSpectrum or Spectrum objects: merges them
+        # Constructor called with two ChordSpectrum or MergedSpectrum objects: merges them
         elif isinstance(args[0].partials, pd.DataFrame) and isinstance(args[1].partials, pd.DataFrame):
             self.fund_hz = 0
             self.partials = args[0].partials.append(args[1].partials, ignore_index = True)
@@ -58,12 +58,15 @@ class ChordSpectrum:
         self.struct_type = chord_struct_type
         self.timbre = timbre
         self.fund_hz = fund_hz
-        self.ref_tone = Spectrum(timbre, fund_hz)
+        self.fund_hz_orig = fund_hz
+        self.ref_tone = MergedSpectrum(timbre, fund_hz)
 
         # Generate chord from reference tone and chord structure
         for (idx, note) in enumerate(chord_struct):
-            new_tone = Spectrum(timbre, fund_hz)
-            # new_tone.partials['hz'] = self.add_note_hz(note)
+            new_tone = MergedSpectrum(timbre, fund_hz)
+            # print('note', note)
+            new_tone.partials['hz'] = self.add_note_hz(note)
+            new_tone.partials['hz_orig'] = new_tone.partials['hz']
             new_tone.partials['note_id'] = idx
             self.partials = self.partials.append(new_tone.partials, ignore_index = True)
 
@@ -72,18 +75,18 @@ class ChordSpectrum:
     # Generate a new note for the chord, based on the chord_struct_type
     def add_note_hz(self, note_hz):
         # chord_struct defines intervals by semitone difference
-        if self.struct_type == 'ST_DIFF':
+        if self.struct_type.upper() == 'ST_DIFF':
             return 2 ** (note_hz / 12) * self.ref_tone.partials['hz']
         # chord_struct defines intervals by frequency scaling (ratios)
-        elif self.struct_type == 'SCALE_FACTOR':
+        elif self.struct_type.upper() == 'SCALE_FACTOR':
             return note_hz * self.ref_tone.partials['hz']
         # chord_struct defines intervals by absolute Hz difference
         # NB: This is still assuming that the timbre describes each tone by
         # multiples of that tone's fundamental.
-        elif self.struct_type == 'HZ_SHIFT':
+        elif self.struct_type.upper() == 'HZ_SHIFT':
             return note_hz + self.ref_tone.partials['hz']
         else:
-            raise ValueError('invalid chord structure type')
+            raise ValueError(f'invalid chord structure type: {self.struct_type}')
 
     def set_fund_hz(self, new_fund_hz: float):
         self.fund_hz = new_fund_hz
@@ -96,16 +99,17 @@ class ChordSpectrum:
 
         if transpose_type.upper() == 'ST_DIFF':
             # self.partials['hz'] *= 2 ** (position / 12)
-            self.set_fund_hz(2 ** (position / 12) * self.fund_hz)
+            self.set_fund_hz(2 ** (position / 12) * self.fund_hz_orig)
+            self.partials['fund_multiple'] = self.partials['hz'] / self.fund_hz
         elif transpose_type.upper() == 'SCALE_FACTOR':
             # self.partials['hz'] *= position
-            self.set_fund_hz(position * self.fund_hz)
+            self.set_fund_hz(position * self.fund_hz_orig)
+            self.partials['fund_multiple'] = self.partials['hz'] / self.fund_hz
         elif transpose_type.upper() == 'HZ_SHIFT':
-            self.partials['hz'] += position
+            self.partials['hz'] = self.partials['hz_orig'] + position
         else:
             raise ValueError('invalid chord structure type')
 
-        self.partials['fund_multiple'] = self.partials['hz'] / self.fund_hz
 
     # Display a stem plot of the chord
     def plot(self):
@@ -176,6 +180,6 @@ class TransposeDomain:
 
 
 
-def plot_line(series):
-    plt.plot(series)
+def plot_line(x, y):
+    plt.plot(x, y)
     plt.show()

@@ -1,5 +1,5 @@
 import numpy as np
-import chordkit.chord_utils as cu
+import chord_utils as cu
 
 default_timbre = cu.default_timbre
 default_fund = cu.default_fund

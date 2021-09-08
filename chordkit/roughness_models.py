@@ -1,9 +1,9 @@
 import math
 import pandas as pd
 import numpy as np
-from chordkit.hearing_models import cbw_volk as cbw, bark_zwicker as bark
-from chordkit.pair_constants import SETHARES_CONSTANTS as sc, AUDITORY_CONSTANTS as ac, pair_volume, pair_distance
-from chordkit.chord_utils import Spectrum
+from hearing_models import cbw_volk as cbw, bark_zwicker as bark
+from pair_constants import SETHARES_CONSTANTS as sc, AUDITORY_CONSTANTS as ac, pair_volume, pair_distance
+from chord_utils import MergedSpectrum
 
 # This file contains both the individual pairwise models used for assessing the
 # roughness of partial pairs and the summing function that adds up all such
@@ -16,7 +16,7 @@ from chordkit.chord_utils import Spectrum
 # Different pairwise roughness evaluation functions. Each has the same signature
 # so that they can be called by the same line of code.
 
-def helmholtz_roughness_pair(x_hz, ref_hz, p = 1):
+def helmholtz_roughness_pair(x_hz, ref_hz, v_x, v_ref, *, p=1, options={}):
 
     # The following constants have not been given values by Helmholtz.
     # They are chosen here somewhat arbitrarily to make the graph resemble his.
@@ -104,7 +104,7 @@ def parncutt_roughness_pair(x_hz, ref_hz, v_x, v_ref, options = {}):
 # all pairwise contributions to roughness. It can use any of the other
 # pairwise roughness evaluation functions.
 def roughness_complex(
-    spectrum: Spectrum,
+    spectrum: MergedSpectrum,
     function_type: str = 'SETHARES',
     amp_type: str = 'MIN',
     cutoff: bool = False,
@@ -123,6 +123,8 @@ def roughness_complex(
         pair_assess = cbw_roughness_pair
     elif function_type.upper() == 'PARNCUTT':
         pair_assess = parncutt_roughness_pair
+    elif function_type.upper() == 'HELMHOLTZ':
+        pair_assess = helmholtz_roughness_pair
 
     # Assess all pairs for roughness
     for i in range(n - 1):
