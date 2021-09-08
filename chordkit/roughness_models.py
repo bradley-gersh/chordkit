@@ -16,6 +16,23 @@ from chordkit.chord_utils import Spectrum
 # Different pairwise roughness evaluation functions. Each has the same signature
 # so that they can be called by the same line of code.
 
+def helmholtz_roughness_pair(x_hz, ref_hz, p = 1):
+
+    # The following constants have not been given values by Helmholtz.
+    # They are chosen here somewhat arbitrarily to make the graph resemble his.
+    bPrime1 = 1
+    bPrime2 = 1
+    beta = 0.01
+
+    delta = ((float(x_hz) / ref_hz) - 1) / 2
+    theta = 15.0 / ref_hz
+
+    s = 4 * bPrime1 * bPrime2 * (beta ** 2) / (beta ** 2 + (2 * np.pi * delta) ** 2)
+
+    r = s * ((2 * theta * delta * p) ** 2) / ((theta ** 2 + (p * delta) ** 2) ** 2)
+
+    return r
+
 # Returns the value of the Sethares "sensory dissonance" (roughness)
 # function at frequency x_hz with respect to ref_hz.
 # Based on Sethares 1997, as implemented in Giordano 2015.
@@ -37,6 +54,7 @@ def sethares_roughness_pair(x_hz, ref_hz, v_x, v_ref, *, amp_type='MIN', cutoff=
     # roughness function at 1.2 CBW, which prevents too-remote partials from
     # contributing to the final score. (Check whether this also prevents drift
     # for larger intervals.)
+    # Sethares' original does not use this cutoff.
     if cutoff:
         cbw_limit = 1.2 * cbw(max[x_hz, ref_hz]) / 2
         if distance < ac['slow_beat_limit'] or distance >= cbw_limit:
@@ -47,7 +65,7 @@ def sethares_roughness_pair(x_hz, ref_hz, v_x, v_ref, *, amp_type='MIN', cutoff=
         scaling = 5
 
     try:
-        return v12 * scaling * (math.exp(-sc['a']*s*distance) - math.exp(-sc['b']*s*distance))
+        return v12 * scaling * (math.exp(-sc['a'] * s * distance) - math.exp(-sc['b'] * s * distance))
     except OverflowError:
         print(f"Overflow in computing roughness: a == {sc['a']}, b == {sc['b']}, s == {s}, distance == {distance}")
 
