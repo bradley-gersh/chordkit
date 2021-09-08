@@ -38,11 +38,16 @@ class MergedSpectrum:
             else:
                 self.fund_hz = 0
 
-        # Constructor called with two ChordSpectrum or MergedSpectrum objects: merges them
-        elif isinstance(args[0].partials, pd.DataFrame) and isinstance(args[1].partials, pd.DataFrame):
+        # Constructor called with ChordSpectrum or MergedSpectrum objects: merges them
+        elif isinstance(args[0].partials, pd.DataFrame):
             self.fund_hz = 0
-            self.partials = args[0].partials.append(args[1].partials, ignore_index = True)
-            self.partials = sort_partials(self.partials)
+            # Two spectra provided: merge them
+            if len(args) > 1 and isinstance(args[1].partials, pd.DataFrame):
+                self.partials = args[0].partials.append(args[1].partials, ignore_index = True)
+                self.partials = sort_partials(self.partials)
+            # Only one spectrum provided: copy it over
+            else:
+                self.partials = args[0].partials.copy(deep=True)
 
 class ChordSpectrum:
     def __init__(

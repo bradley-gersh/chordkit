@@ -43,10 +43,13 @@ def roughness_curve(
         # new_test_timbre['fund_multiple'] = cu.slide_timbre(position, test_timbre, chord_struct_type=chord_struct_type)
         # test_chord = cu.make_chord(test_chord_struct, chord_struct_type, timbre=new_test_timbre, fund_hz=fund_hz)
         test_chord.transpose(position, transpose_domain.transpose_type)
-        # print(test_chord.partials)
         # union = ref_chord.append(test_chord, ignore_index=True)
-        union = MergedSpectrum(ref_chord, test_chord)
-        # print(union.partials)
+
+        if function_type.upper() == 'HELMHOLTZ':
+            union = MergedSpectrum(test_chord)
+        else:
+            union = MergedSpectrum(ref_chord, test_chord)
+
         curr_roughness_val = (roughness_complex(union, function_type, options=options))['roughness']
         roughness_vals[idx] = curr_roughness_val
 
