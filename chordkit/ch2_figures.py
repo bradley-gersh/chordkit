@@ -1,4 +1,5 @@
 from chord_utils import Timbre, MergedSpectrum, ChordSpectrum, TransposeDomain
+from defaults import sethares_timbre, sine_tone, default_fund, c4
 from roughness_plot import roughness_curve
 from roughness_models import roughness_complex
 from matplotlib import pyplot as plt
@@ -53,7 +54,7 @@ def ch2_fig2a(action):
     title = 'ch2_fig2a'
 
     # 1 partial (fundamental only), amplitude 1
-    tim = Timbre([1], [1])
+    tim = sine_tone
     fund_hz = 220.0
 
     ref_chord = ChordSpectrum([0], 'ST_DIFF', timbre=tim, fund_hz=fund_hz)
@@ -93,7 +94,8 @@ def ch2_fig2b(action):
     title = 'ch2_fig2b'
 
     # 7 partials, partial p has amplitude 0.88^p (after Sethares 1993, Fig. 2)
-    tim = Timbre(range(1, 8), [0.88 ** p for p in range(1,8)])
+    # tim = Timbre(range(1, 8), [0.88 ** p for p in range(1,8)])
+    tim = sethares_timbre
     fund_hz = 440.0
 
     ref_chord = ChordSpectrum([0], 'ST_DIFF', timbre=tim, fund_hz=fund_hz)
@@ -139,7 +141,8 @@ def ch2_fig3(action):
     title = 'ch2_fig3'
 
     # Use the same timbre as Sethares 1993
-    tim = Timbre(range(1, 8), [0.88 ** p for p in range(1, 8)])
+    # tim = Timbre(range(1, 8), [0.88 ** p for p in range(1, 8)])
+    tim = sethares_timbre
     fund_hz = ac['midi_zero']
 
     # The lower octave is not doubled, following the holograph score shown at
@@ -189,23 +192,28 @@ def ch2_fig3(action):
     ref_chord = ChordSpectrum([0], 'ST_DIFF', timbre=tim, fund_hz=fund_hz)
 
     fratres_outer_diss = [
-        roughness_complex(MergedSpectrum(fratres_drone, chord), 'SETHARES')['roughness'] for chord in fratres_tenths
+        roughness_complex(MergedSpectrum(fratres_drone, chord), 'SETHARES') for chord in fratres_tenths
     ]
 
     fratres_var_1_diss = [
-        roughness_complex(MergedSpectrum(fratres_drone, chord), 'SETHARES')['roughness'] for chord in fratres_upper_var_1
+        roughness_complex(MergedSpectrum(fratres_drone, chord), 'SETHARES') for chord in fratres_upper_var_1
     ]
 
     fratres_var_2_diss = [
-        roughness_complex(MergedSpectrum(fratres_drone, chord), 'SETHARES')['roughness'] for chord in fratres_upper_var_2
+        roughness_complex(MergedSpectrum(fratres_drone, chord), 'SETHARES') for chord in fratres_upper_var_2
     ]
+
+    # Normalize so drone has roughness 1
+    fratres_outer_diss_n = [float(x) / fratres_outer_diss[0] for x in fratres_outer_diss]
+    fratres_var_1_diss_n = [float(x) / fratres_var_1_diss[0] for x in fratres_var_1_diss]
+    fratres_var_2_diss_n = [float(x) / fratres_var_2_diss[0] for x in fratres_var_2_diss]
 
     # Plot
     fig, ax = plt.subplots()
     fig.set_figwidth(10)
-    plt.plot(['drone'] + list(range(1,10)), fratres_outer_diss, 'k')
-    # plt.plot(['drone'] + list(range(1,10)), fratres_var_1_diss, 'k')
-    # plt.plot(['drone'] + list(range(1,10)), fratres_var_2_diss, 'k')
+    plt.plot(['drone'] + list(range(1,10)), fratres_outer_diss_n, 'k')
+    # plt.plot(['drone'] + list(range(1,10)), fratres_var_1_diss_n, 'k')
+    # plt.plot(['drone'] + list(range(1,10)), fratres_var_2_diss_n, 'k')
     plt.xlabel('section')
     plt.ylabel('roughness (arbitrary units)')
     plt.ylim(ymin=0.0)
@@ -218,6 +226,75 @@ def ch2_fig3(action):
     else:
         plt.show()
 
+def ch2_fig4(action):
+    title = 'ch2_fig4'
+
+    # Use the same timbre as Sethares 1993
+    tim = sethares_timbre
+    fund_hz = c4
+
+    maj3_dyad = ChordSpectrum([0, 4], 'ST_DIFF', timbre=tim, fund_hz=fund_hz)
+    maj53_triad = ChordSpectrum([0, 4, 7], 'ST_DIFF', timbre=tim, fund_hz=fund_hz)
+    maj7_dyad = ChordSpectrum([0, 11], 'ST_DIFF', timbre=tim, fund_hz=fund_hz)
+
+    maj3_diss = roughness_complex(maj3_dyad, 'SETHARES')
+    maj53_diss = roughness_complex(maj53_triad, 'SETHARES')
+    maj7_diss = roughness_complex(maj7_dyad, 'SETHARES')
+
+    data = {
+        '[C4, E4]': maj3_diss,
+        '[C4, E4, G4]': maj53_diss,
+        '[C4, B4]': maj7_diss
+    }
+    plot0_names = ['[C4, E4]', '[C4, E4, G4]']
+    plot1_names = ['[C4, E4]', '[C4, B4]']
+    plot0_vals = [data[name] for name in plot0_names]
+    plot1_vals = [data[name] for name in plot1_names]
+
+    # Plot
+    fig, ax = plt.subplots(2, 3, figsize=(12,5), gridspec_kw={'width_ratios': [2, 2, 1]})
+    plt.subplots_adjust(wspace=0.5, hspace=0.7)
+    # plt.tight_layout()
+    # fig.set_figwidth(12)
+    for row in ax:
+        for panel in row[0:2]:
+            panel.spines['right'].set_visible(False)
+            panel.spines['top'].set_visible(False)
+            panel.set_ylim([0, 1.1])
+            panel.set_xlim([0, 3600.])
+            panel.set_ylabel('amplitude\n(arbitrary units)')
+            panel.set_xlabel('frequency (Hz)')
+
+    ax[0,0].stem(maj3_dyad.partials['hz'], maj3_dyad.partials['amp'], linefmt='k', markerfmt='ko', basefmt=' ')
+    ax[0,0].set_title('[C4, E4]')
+    ax[0,1].stem(maj53_triad.partials['hz'], maj53_triad.partials['amp'], linefmt='k', markerfmt='ko', basefmt=' ')
+    ax[0,1].set_title('[C4, E4, G4]')
+    ax[0,2].bar(plot0_names, plot0_vals, fill=False, hatch='///')
+    ax[0,2].set_ylim([0, maj53_diss * 1.1])
+    ax[0,2].spines['right'].set_visible(False)
+    ax[0,2].spines['top'].set_visible(False)
+    ax[0,2].set_ylabel('roughness\n(arbitrary units)')
+
+    ax[1,0].stem(maj3_dyad.partials['hz'], maj3_dyad.partials['amp'], linefmt='k', markerfmt='ko', basefmt=' ')
+    ax[1,0].set_title('[C4, E4]')
+    ax[1,1].stem(maj7_dyad.partials['hz'], maj7_dyad.partials['amp'], linefmt='k', markerfmt='ko', basefmt=' ')
+    ax[1,1].set_title('[C4, B4]')
+    ax[1,2].bar(plot1_names, plot1_vals, fill=False, hatch='///')
+    ax[1,2].set_ylim([0, maj53_diss * 1.1])
+    ax[1,2].spines['right'].set_visible(False)
+    ax[1,2].spines['top'].set_visible(False)
+    ax[1,2].set_ylabel('roughness\n(arbitrary units)')
+
+    fig.add_artist(plt.Line2D([0, 1], [0.48, 0.48], color='k'))
+    fig.add_artist(plt.Text(0.02, 0.75, '(a)', size=16.0, weight='bold'))
+    fig.add_artist(plt.Text(0.02, 0.25, '(b)', size=16.0, weight='bold'))
+
+    if action.lower() == 'save':
+        plt.savefig(f'{title}.png', dpi=350)
+        print(f'{title}.png saved')
+
+    else:
+        plt.show()
 
 #### APPENDIX FIGURES
 # Figure 1b, appendix. My attempt to implement Helmholtz’s composite function.
@@ -365,8 +442,8 @@ def __main__(argv):
     # ch2_fig1a(action)
     # ch2_fig2a(action)
     # ch2_fig2b(action)
-    ch2_fig3(action)
-    # ch2_fig4(action)
+    # ch2_fig3(action)
+    ch2_fig4(action)
     # ch2_fig5(action)
     # ch2_fig6(action)
     # ch2_fig7a(action)

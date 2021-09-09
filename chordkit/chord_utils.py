@@ -18,7 +18,11 @@ class Timbre:
     def copy(self):
         return Timbre(list(self.partials['fund_multiple']), list(self.partials['amp']))
 
-default_timbre = Timbre(range(1, 13), [1/n for n in range(1, 13)])
+# Some useful timbres
+basic_saw_timbre = Timbre(range(1, 13), [1/p for p in range(1, 13)])
+sethares_timbre = Timbre(range(1, 8), [0.88 ** p for p in range(0, 7)])
+sine_tone = Timbre([1], [1])
+
 default_fund = 220.0
 
 def sort_partials(partials: pd.DataFrame):
@@ -55,7 +59,7 @@ class ChordSpectrum:
         chord_struct: list,
         chord_struct_type: str = 'ST_DIFF',
         *,
-        timbre: Timbre = default_timbre,
+        timbre: Timbre = basic_saw_timbre,
         fund_hz: float = default_fund
     ):
         self.partials = pd.DataFrame()
@@ -120,6 +124,7 @@ class ChordSpectrum:
     def plot(self):
         plt.stem(self.partials['hz'], self.partials['amp'])
         plt.show()
+
 
 class TransposeDomain:
     def __init__(self, low_bound, high_bound, steps, transpose_type):

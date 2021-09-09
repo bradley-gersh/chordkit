@@ -44,7 +44,7 @@ def helmholtz_roughness_pair(x_hz, *, x_p=1, ref_p=1, options={}):
 def sethares_roughness_pair(x_hz, ref_hz, v_x, v_ref, *, cutoff=False, options = {
     'original': False,
     'amp_type': 'MIN',
-    'cutoff': False
+    'cutoff': False,
 }):
     s = sc['s_star'] / (sc['s1'] * min([x_hz, ref_hz]) + sc['s2'])
 
@@ -122,7 +122,8 @@ def roughness_complex(
     options={
         'amp_type': 'MIN',
         'cutoff': False,
-        'original': False
+        'original': False,
+        'show_partials': False
     }
 ):
     n = len(spectrum.partials['hz'])
@@ -158,7 +159,7 @@ def roughness_complex(
                     ref_p=j + 1,
                     options=options
                 )
-                if rough_vals[i][j] > rough_limit:
+                if options['show_partials'] == True and rough_vals[i][j] > rough_limit:
                     rough_partials.append((i, j))
 
     # Pairwise evaluations, as used by Hutchinson/Knopoff, Sethares, Parncutt.
@@ -172,10 +173,13 @@ def roughness_complex(
                     spectrum.partials['amp'][j],
                     options=options
                 )
-                if rough_vals[i][j] > rough_limit:
+                if options['show_partials'] == True and rough_vals[i][j] > rough_limit:
                     rough_partials.append((i, j))
 
-    return {
-        'roughness': np.sum(rough_vals),
-        'rough_partials': rough_partials
-    }
+    if options['show_partials']:
+        return {
+            'roughness': np.sum(rough_vals),
+            'rough_partials': rough_partials
+        }
+
+    return np.sum(rough_vals)

@@ -20,7 +20,10 @@ def roughness_curve(
     normalize: bool = False,
     options = {
         #'crossterms_only': False, # Need to implement
-        'original': False
+        'amp_type': 'MIN',
+        'cutoff': False,
+        'original': False,
+        'show_partials': False
     }
 ):
 
@@ -50,7 +53,10 @@ def roughness_curve(
         else:
             union = MergedSpectrum(ref_chord, test_chord)
 
-        curr_roughness_val = (roughness_complex(union, function_type, options=options))['roughness']
+        if options['show_partials']:
+            curr_roughness_val = (roughness_complex(union, function_type, options=options))['roughness']
+        else:
+            curr_roughness_val = (roughness_complex(union, function_type, options=options))
         roughness_vals[idx] = curr_roughness_val
 
     if plot:
