@@ -41,15 +41,17 @@ def helmholtz_roughness_pair(x_hz, *, x_p=1, ref_p=1, options={}):
 # Returns the value of the Sethares "sensory dissonance" (roughness)
 # function at frequency x_hz with respect to ref_hz.
 # Based on Sethares 1997, as implemented in Giordano 2015.
-def sethares_roughness_pair(x_hz, ref_hz, v_x, v_ref, *, amp_type='PRODUCT', cutoff=False, options = {
-    'original': False
+def sethares_roughness_pair(x_hz, ref_hz, v_x, v_ref, *, cutoff=False, options = {
+    'original': False,
+    'amp_type': 'MIN',
+    'cutoff': False
 }):
     s = sc['s_star'] / (sc['s1'] * min([x_hz, ref_hz]) + sc['s2'])
 
-    if options['original']:
-        amp_type = 'PRODUCT'
+    if options['original'] == True:
+        options['amp_type'] = 'PRODUCT'
 
-    v12 = pair_volume(v_x, v_ref, amp_type)
+    v12 = pair_volume(v_x, v_ref, options['amp_type'])
 
     # Sethares' MATLAB implementation (but not the published paper)
     scaling = 5
@@ -72,8 +74,6 @@ def sethares_roughness_pair(x_hz, ref_hz, v_x, v_ref, *, amp_type='PRODUCT', cut
         cbw_limit = 1.2 * cbw(max[x_hz, ref_hz]) / 2
         if distance < ac['slow_beat_limit'] or distance >= cbw_limit:
             v12 = 0
-
-
 
     try:
         return v12 * scaling * (math.exp(-sc['a'] * s * distance) - math.exp(-sc['b'] * s * distance))

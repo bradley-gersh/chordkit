@@ -17,8 +17,8 @@ def roughness_curve(
     transpose_domain: TransposeDomain = de.default_transpose_domain,
     function_type: str = de.default_function_type,
     plot: bool = True,
+    normalize: bool = False,
     options = {
-        'normalize': True,
         #'crossterms_only': False, # Need to implement
         'original': False
     }
@@ -55,5 +55,9 @@ def roughness_curve(
 
     if plot:
         plot_line(transpose_domain.domain, roughness_vals)
+
+    if normalize:
+        plotMax = max(roughness_vals)
+        roughness_vals /= float(plotMax)
 
     return roughness_vals
