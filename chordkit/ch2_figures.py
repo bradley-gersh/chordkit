@@ -1,7 +1,9 @@
-from chord_utils import Timbre, ChordSpectrum, TransposeDomain
+from chord_utils import Timbre, MergedSpectrum, ChordSpectrum, TransposeDomain
 from roughness_plot import roughness_curve
+from roughness_models import roughness_complex
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MultipleLocator, AutoMinorLocator
+from pair_constants import AUDITORY_CONSTANTS as ac
 import sys
 import numpy as np
 
@@ -132,6 +134,90 @@ def ch2_fig2b(action):
 
     else:
         plt.show()
+
+def ch2_fig3(action):
+    title = 'ch2_fig3'
+
+    # Use the same timbre as Sethares 1993
+    tim = Timbre(range(1, 8), [0.88 ** p for p in range(1, 8)])
+    fund_hz = ac['midi_zero']
+
+    # The lower octave is not doubled, following the holograph score shown at
+    # on the Arvo Pärt Centre website, https://www.arvopart.ee/en/arvo-part/work/390/
+    fratres_drone = ChordSpectrum([45, 52], 'ST_DIFF', timbre=tim, fund_hz=fund_hz)
+
+    fratres_tenths = [ChordSpectrum(chord, 'ST_DIFF', timbre=tim, fund_hz=fund_hz) for chord in [
+        [],
+        [73, 88],
+        [69, 85],
+        [65, 81],
+        [62, 77],
+        [58, 74],
+        [55, 70],
+        [52, 67],
+        [49, 64],
+        [57, 61]
+    ]]
+
+    fratres_upper_var_1 = [ChordSpectrum(chord, 'ST_DIFF', timbre=tim, fund_hz=fund_hz) for chord in [
+        [],
+        [73, 88, 81],
+        [69, 85, 76],
+        [65, 81, 72],
+        [62, 77, 72], # variable 72/69
+        [58, 74, 69], # variable 69/64
+        [55, 70, 64], # variable 64/60
+        [52, 67, 60],
+        [49, 64, 57],
+        [57, 61, 52]
+    ]]
+
+    # The next one includes the other variable sonorities
+    fratres_upper_var_2 = [ChordSpectrum(chord, 'ST_DIFF', timbre=tim, fund_hz=fund_hz) for chord in [
+        [],
+        [73, 88, 81],
+        [69, 85, 76],
+        [65, 81, 72],
+        [62, 77, 69], # variable 72/69
+        [58, 74, 64], # variable 69/64
+        [55, 70, 60], # variable 64/60
+        [52, 67, 60],
+        [49, 64, 57],
+        [57, 61, 52]
+    ]]
+
+    ref_chord = ChordSpectrum([0], 'ST_DIFF', timbre=tim, fund_hz=fund_hz)
+
+    fratres_outer_diss = [
+        roughness_complex(MergedSpectrum(fratres_drone, chord), 'SETHARES')['roughness'] for chord in fratres_tenths
+    ]
+
+    fratres_var_1_diss = [
+        roughness_complex(MergedSpectrum(fratres_drone, chord), 'SETHARES')['roughness'] for chord in fratres_upper_var_1
+    ]
+
+    fratres_var_2_diss = [
+        roughness_complex(MergedSpectrum(fratres_drone, chord), 'SETHARES')['roughness'] for chord in fratres_upper_var_2
+    ]
+
+    # Plot
+    fig, ax = plt.subplots()
+    fig.set_figwidth(10)
+    plt.plot(['drone'] + list(range(1,10)), fratres_outer_diss, 'k')
+    # plt.plot(['drone'] + list(range(1,10)), fratres_var_1_diss, 'k')
+    # plt.plot(['drone'] + list(range(1,10)), fratres_var_2_diss, 'k')
+    plt.xlabel('section')
+    plt.ylabel('roughness (arbitrary units)')
+    plt.ylim(ymin=0.0)
+    ax.yaxis.set_label_coords(-0.06, 0.5)
+
+    if action.lower() == 'save':
+        plt.savefig(f'{title}.png', dpi=350)
+        print(f'{title}.png saved')
+
+    else:
+        plt.show()
+
 
 #### APPENDIX FIGURES
 # Figure 1b, appendix. My attempt to implement Helmholtz’s composite function.
@@ -276,10 +362,10 @@ def __main__(argv):
     if len(argv) > 1:
         action = argv[1].lower()
 
-    ch2_fig1a(action)
-    ch2_fig2a(action)
-    ch2_fig2b(action)
-    # ch2_fig3(action)
+    # ch2_fig1a(action)
+    # ch2_fig2a(action)
+    # ch2_fig2b(action)
+    ch2_fig3(action)
     # ch2_fig4(action)
     # ch2_fig5(action)
     # ch2_fig6(action)

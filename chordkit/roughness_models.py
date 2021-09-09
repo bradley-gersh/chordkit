@@ -117,11 +117,11 @@ def parncutt_roughness_pair(x_hz, ref_hz, v_x, v_ref, options = {}):
 def roughness_complex(
     spectrum: MergedSpectrum,
     function_type: str = 'SETHARES',
-    amp_type: str = 'MIN',
-    cutoff: bool = False,
     rough_limit: float = 0.1,
     *,
     options={
+        'amp_type': 'MIN',
+        'cutoff': False,
         'original': False
     }
 ):
@@ -150,7 +150,6 @@ def roughness_complex(
     if function_type.upper() == 'HELMHOLTZ':
         m = len(spectrum.partials['hz'])
         n = len(options['ref'])
-        ## NEED TO FIX THIS ASSESSMENT FUNCTION
         for i in range(m):
             for j in range(n):
                 rough_vals[i][j] = helmholtz_roughness_pair(
