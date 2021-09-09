@@ -1,5 +1,5 @@
 from chord_utils import Timbre, MergedSpectrum, ChordSpectrum, TransposeDomain
-from defaults import sethares_timbre, sine_tone, default_fund, c4
+from defaults import sethares_timbre, sine_tone, default_fund, c4, midi_zero
 from roughness_plot import roughness_curve
 from roughness_models import roughness_complex
 from matplotlib import pyplot as plt
@@ -55,7 +55,7 @@ def ch2_fig2a(action):
 
     # 1 partial (fundamental only), amplitude 1
     tim = sine_tone
-    fund_hz = 220.0
+    fund_hz = 440.0
 
     ref_chord = ChordSpectrum([0], 'ST_DIFF', timbre=tim, fund_hz=fund_hz)
     test_chord = ChordSpectrum([0], 'ST_DIFF', timbre=tim, fund_hz=fund_hz)
@@ -112,7 +112,6 @@ def ch2_fig2b(action):
         normalize=True,
         options={
           'original': False,
-          'normalize': True,
           'amp_type': 'MIN'
         }
     )
@@ -137,13 +136,14 @@ def ch2_fig2b(action):
     else:
         plt.show()
 
+# Figure 3. Sethares roughness for Fratres chords
 def ch2_fig3(action):
     title = 'ch2_fig3'
 
     # Use the same timbre as Sethares 1993
     # tim = Timbre(range(1, 8), [0.88 ** p for p in range(1, 8)])
     tim = sethares_timbre
-    fund_hz = ac['midi_zero']
+    fund_hz = midi_zero
 
     # The lower octave is not doubled, following the holograph score shown at
     # on the Arvo Pärt Centre website, https://www.arvopart.ee/en/arvo-part/work/390/
@@ -226,6 +226,7 @@ def ch2_fig3(action):
     else:
         plt.show()
 
+# Figure 4. Discrepancies between Sethares roughness and dissonance.
 def ch2_fig4(action):
     title = 'ch2_fig4'
 
@@ -295,6 +296,103 @@ def ch2_fig4(action):
 
     else:
         plt.show()
+
+# Figure 5. Octave drift and correction in Sethares roughness.
+def ch2_fig5(action): # Not working yet
+    title = 'ch2_fig5'
+
+    tim = Timbre(range(1, 8), 1)
+    longtim = Timbre(range(1, 15), 1)
+    fund_hz = 440.0
+
+    ref_chord_1 = ChordSpectrum([0], 'ST_DIFF', timbre=tim, fund_hz=fund_hz)
+    ref_chord_2 = ChordSpectrum([0], 'ST_DIFF', timbre=longtim, fund_hz=fund_hz)
+    test_chord = ChordSpectrum([0], 'ST_DIFF', timbre=tim, fund_hz=fund_hz)
+
+    transpose_domain = TransposeDomain(-0.5, 12.5, 150, 'ST_DIFF')
+
+    roughness_1 = roughness_curve(
+        ref_chord_2,
+        test_chord,
+        transpose_domain=transpose_domain,
+        function_type='SETHARES',
+        plot=False,
+        normalize=True,
+        options={
+          'amp_type': 'MIN',
+          'crossterms_only': False,
+          'original': False,
+          'show_partials': False
+        }
+    )
+
+    roughness_2 = roughness_curve(
+        ref_chord_2,
+        test_chord,
+        transpose_domain=transpose_domain,
+        function_type='SETHARES',
+        plot=False,
+        normalize=True,
+        options={
+          'amp_type': 'MIN',
+          'crossterms_only': True,
+          'original': False,
+          'show_partials': False
+        }
+    )
+
+    # Plot
+    fig, ax = plt.subplots()
+    fig.set_figwidth(10)
+    plt.plot(transpose_domain.domain, roughness_1, 'k.',)
+    plt.plot(transpose_domain.domain, roughness_2, 'k')
+    plt.xlabel('interval (semitones)')
+    plt.ylabel('roughness (arbitrary units)')
+    plt.ylim(ymin=0.0)
+    ax.xaxis.set_major_locator(MultipleLocator(1))
+    ax.xaxis.set_major_formatter('{x:.0f}')
+    # ax.xaxis.set_minor_locator(MultipleLocator(1))
+    # plt.subplots_adjust(left=0.15)
+    ax.yaxis.set_label_coords(-0.06, 0.5)
+
+    if action.lower() == 'save':
+        plt.savefig(f'{title}.png', dpi=350)
+        print(f'{title}.png saved')
+    else:
+        plt.show()
+
+# Figure 6. A wide chord.
+def ch2_fig6(action):
+    title = 'ch2_fig6'
+
+    tim = sethares_timbre
+    fund_hz = midi_zero
+
+    chord = ChordSpectrum([49, 60, 71], 'ST_DIFF', timbre=tim, fund_hz=fund_hz)
+
+    # Plot
+    fig, ax = plt.subplots()
+    fig.set_figwidth(10)
+    plt.stem(chord.partials['hz'], chord.partials['amp'])
+    plt.xlabel('frequency (Hz)')
+    plt.ylabel('amplitude (arbitrary units)')
+    plt.ylim(ymin=0.0)
+    ax.yaxis.set_label_coords(-0.06, 0.5)
+
+    if action.lower() == 'save':
+        plt.savefig(f'{title}.png', dpi=350)
+        print(f'{title}.png saved')
+    else:
+        plt.show()
+
+# Figure 7a. Pair-overlap curve.
+def ch2_fig7a(action):
+    pass
+
+# Figure 7b: Complex overlap curve.
+def ch2_fig7b(action):
+    pass
+
 
 #### APPENDIX FIGURES
 # Figure 1b, appendix. My attempt to implement Helmholtz’s composite function.
@@ -443,9 +541,9 @@ def __main__(argv):
     # ch2_fig2a(action)
     # ch2_fig2b(action)
     # ch2_fig3(action)
-    ch2_fig4(action)
+    # ch2_fig4(action)
     # ch2_fig5(action)
-    # ch2_fig6(action)
+    ch2_fig6(action)
     # ch2_fig7a(action)
     # ch2_fig7b(action)
     # ch2_fig8(action)

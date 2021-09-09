@@ -53,6 +53,12 @@ class MergedSpectrum:
             else:
                 self.partials = args[0].partials.copy(deep=True)
 
+    # Display a stem plot of the spectrum
+    def plot(self):
+        plt.stem(self.partials['hz'], self.partials['amp'])
+        plt.show()
+
+
 class ChordSpectrum:
     def __init__(
         self,

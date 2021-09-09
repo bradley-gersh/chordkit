@@ -11,6 +11,8 @@ default_fund = cu.default_fund
 a4 = 440.0
 a3 = 220.0
 c4 = 261.6255653005986
+midi_zero = 8.175798915643707 # Hz value for C(-1). Choosing this as the 'fundamental' allows MIDI numbers
+                              # to be used for specifying chords
 
 # Chord structures
 default_chord_struct = [0]

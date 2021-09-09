@@ -19,7 +19,7 @@ def roughness_curve(
     plot: bool = True,
     normalize: bool = False,
     options = {
-        #'crossterms_only': False, # Need to implement
+        'crossterms_only': False,
         'amp_type': 'MIN',
         'cutoff': False,
         'original': False,
@@ -42,6 +42,12 @@ def roughness_curve(
     # if chord_struct_type.upper() == 'HZ_SHIFT':
         # fund_hz = 0
 
+    if options['crossterms_only']:
+        if options['show_partials']:
+            ref_self_diss = (roughness_complex(ref_chord, function_type, options=options))['roughness']
+        else:
+            ref_self_diss = (roughness_complex(ref_chord, function_type, options=options))
+
     for (idx, position) in enumerate(transpose_domain.domain):
         # new_test_timbre['fund_multiple'] = cu.slide_timbre(position, test_timbre, chord_struct_type=chord_struct_type)
         # test_chord = cu.make_chord(test_chord_struct, chord_struct_type, timbre=new_test_timbre, fund_hz=fund_hz)
@@ -57,6 +63,14 @@ def roughness_curve(
             curr_roughness_val = (roughness_complex(union, function_type, options=options))['roughness']
         else:
             curr_roughness_val = (roughness_complex(union, function_type, options=options))
+
+        if options['crossterms_only']:
+            if options['show_partials']:
+                test_self_diss = (roughness_complex(ref_chord, function_type, options=options))['roughness']
+            else:
+                test_self_diss = (roughness_complex(ref_chord, function_type, options=options))
+            curr_roughness_val -= (ref_self_diss + test_self_diss)
+
         roughness_vals[idx] = curr_roughness_val
 
     if plot:
