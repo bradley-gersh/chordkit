@@ -11,8 +11,6 @@ SETHARES_CONSTANTS = {
 
 AUDITORY_CONSTANTS = {
     'slow_beat_limit': 15, # +/- Hz limit for zone where two sine waves create sensation of slow beats
-    'midi_zero': 8.175798915643707 # Hz value for C(-1). Choosing this as the 'fundamental' allows MIDI numbers
-                                  # to be used for specifying chords
 }
 
 # Volume scale

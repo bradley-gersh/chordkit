@@ -1,6 +1,6 @@
 from chord_utils import Timbre, MergedSpectrum, ChordSpectrum, TransposeDomain
 from defaults import sethares_timbre, sine_tone, default_fund, c4, midi_zero
-from roughness_plot import roughness_curve
+from chord_plots import overlap_curve, roughness_curve
 from roughness_models import roughness_complex
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MultipleLocator, AutoMinorLocator
@@ -385,13 +385,239 @@ def ch2_fig6(action):
     else:
         plt.show()
 
-# Figure 7a. Pair-overlap curve.
+# Figure 7a: Complex overlap curve.
 def ch2_fig7a(action):
-    pass
+    title = 'ch2_fig7a'
 
-# Figure 7b: Complex overlap curve.
+    tim = sine_tone
+    fund_hz = 440.0
+
+    ref_chord = ChordSpectrum([0], 'ST_DIFF', timbre=tim, fund_hz=fund_hz)
+    test_chord = ChordSpectrum([0], 'ST_DIFF', timbre=tim, fund_hz=fund_hz)
+
+    transpose_domain = TransposeDomain(-12, 12, 2000, 'ST_DIFF')
+
+    overlap = overlap_curve(
+        ref_chord,
+        test_chord,
+        transpose_domain=transpose_domain,
+        function_type='BELL',
+        plot=False,
+        normalize=True,
+        options={
+          'amp_type': 'MIN',
+          'crossterms_only': False,
+          'cutoff': False,
+          'original': False,
+          'show_partials': False
+        }
+    )
+
+    roughness = roughness_curve(
+        ref_chord,
+        test_chord,
+        transpose_domain=transpose_domain,
+        function_type='SETHARES',
+        plot=False,
+        normalize=True,
+        options={
+          'amp_type': 'MIN',
+          'crossterms_only': False,
+          'cutoff': False,
+          'original': False,
+          'show_partials': False
+        }
+    )
+
+    # Plot
+    _, ax = plt.subplots()
+    ax.plot(transpose_domain.domain, overlap, color='k', linestyle='-', linewidth=3)
+    ax.plot(transpose_domain.domain, roughness, color='k', linestyle='--', linewidth=1)
+    ax.legend(['overlap', 'roughness'], edgecolor='k')
+    plt.xlabel('interval (semitones)')
+    plt.ylabel('(arbitrary units)')
+    ax.xaxis.set_major_locator(MultipleLocator(4))
+    ax.xaxis.set_major_formatter('{x:.0f}')
+    ax.xaxis.set_minor_locator(MultipleLocator(1))
+    plt.subplots_adjust(left=0.15)
+    ax.yaxis.set_label_coords(-0.13, 0.5)
+
+    if action.lower() == 'save':
+        plt.savefig(f'{title}.png', dpi=350)
+        print(f'{title}.png saved')
+    else:
+        plt.show()
+
+# Figure 7b. Pair-overlap curve.
 def ch2_fig7b(action):
-    pass
+    title = 'ch2_fig7b'
+
+    tim = sethares_timbre
+    fund_hz = 440.0
+
+    ref_chord = ChordSpectrum([0], 'ST_DIFF', timbre=tim, fund_hz=fund_hz)
+    test_chord = ChordSpectrum([0], 'ST_DIFF', timbre=tim, fund_hz=fund_hz)
+
+    transpose_domain = TransposeDomain(-0.5, 12.5, 2300, 'ST_DIFF')
+
+    overlap = overlap_curve(
+        ref_chord,
+        test_chord,
+        transpose_domain=transpose_domain,
+        function_type='BELL',
+        plot=False,
+        normalize=True,
+        options={
+          'amp_type': 'MIN',
+          'crossterms_only': False,
+          'cutoff': False,
+          'original': False,
+          'show_partials': False
+        }
+    )
+
+    roughness = roughness_curve(
+        ref_chord,
+        test_chord,
+        transpose_domain=transpose_domain,
+        function_type='SETHARES',
+        plot=False,
+        normalize=True,
+        options={
+          'amp_type': 'MIN',
+          'crossterms_only': False,
+          'cutoff': False,
+          'original': False,
+          'show_partials': False
+        }
+    )
+
+    # Plot
+    fig, ax = plt.subplots()
+    fig.set_figwidth(10)
+    ax.plot(transpose_domain.domain, overlap, 'k', linewidth=3)
+    ax.plot(transpose_domain.domain, roughness, 'k--', linewidth=1)
+    ax.legend(['overlap', 'roughness'], edgecolor='k')
+    plt.xlabel('interval (semitones)')
+    plt.ylabel('(arbitrary units)')
+    plt.ylim(ymin=0.0)
+    ax.xaxis.set_major_locator(MultipleLocator(1))
+    ax.xaxis.set_major_formatter('{x:.0f}')
+    ax.yaxis.set_label_coords(-0.06, 0.5)
+
+    if action.lower() == 'save':
+        plt.savefig(f'{title}.png', dpi=350)
+        print(f'{title}.png saved')
+    else:
+        plt.show()
+
+def ch2_fig8a(action):
+    title = 'ch2_fig8a'
+
+    if action.lower() == 'save':
+        plt.savefig(f'{title}.png', dpi=350)
+        print(f'{title}.png saved')
+    else:
+        plt.show()
+
+def ch2_fig8b(action):
+    title = 'ch2_fig8b'
+
+    if action.lower() == 'save':
+        plt.savefig(f'{title}.png', dpi=350)
+        print(f'{title}.png saved')
+    else:
+        plt.show()
+
+def ch2_fig9(action):
+    title = 'ch2_fig9'
+
+    if action.lower() == 'save':
+        plt.savefig(f'{title}.png', dpi=350)
+        print(f'{title}.png saved')
+    else:
+        plt.show()
+
+def ch2_fig10(action):
+    title = 'ch2_fig10'
+
+    if action.lower() == 'save':
+        plt.savefig(f'{title}.png', dpi=350)
+        print(f'{title}.png saved')
+    else:
+        plt.show()
+
+def ch2_fig11(action):
+    title = 'ch2_fig11'
+
+    if action.lower() == 'save':
+        plt.savefig(f'{title}.png', dpi=350)
+        print(f'{title}.png saved')
+    else:
+        plt.show()
+
+def ch2_fig12(action):
+    title = 'ch2_fig12'
+
+    if action.lower() == 'save':
+        plt.savefig(f'{title}.png', dpi=350)
+        print(f'{title}.png saved')
+    else:
+        plt.show()
+
+def ch2_fig13(action):
+    title = 'ch2_fig13'
+
+    if action.lower() == 'save':
+        plt.savefig(f'{title}.png', dpi=350)
+        print(f'{title}.png saved')
+    else:
+        plt.show()
+
+def ch2_fig14a(action):
+    title = 'ch2_fig14a'
+
+    if action.lower() == 'save':
+        plt.savefig(f'{title}.png', dpi=350)
+        print(f'{title}.png saved')
+    else:
+        plt.show()
+
+def ch2_fig14b(action):
+    title = 'ch2_fig14b'
+
+    if action.lower() == 'save':
+        plt.savefig(f'{title}.png', dpi=350)
+        print(f'{title}.png saved')
+    else:
+        plt.show()
+
+def ch2_fig15a(action):
+    title = 'ch2_fig15a'
+
+    if action.lower() == 'save':
+        plt.savefig(f'{title}.png', dpi=350)
+        print(f'{title}.png saved')
+    else:
+        plt.show()
+
+def ch2_fig15b(action):
+    title = 'ch2_fig15b'
+
+    if action.lower() == 'save':
+        plt.savefig(f'{title}.png', dpi=350)
+        print(f'{title}.png saved')
+    else:
+        plt.show()
+
+def ch2_fig16(action):
+    title = 'ch2_fig16'
+
+    if action.lower() == 'save':
+        plt.savefig(f'{title}.png', dpi=350)
+        print(f'{title}.png saved')
+    else:
+        plt.show()
 
 
 #### APPENDIX FIGURES
@@ -543,9 +769,9 @@ def __main__(argv):
     # ch2_fig3(action)
     # ch2_fig4(action)
     # ch2_fig5(action)
-    ch2_fig6(action)
-    # ch2_fig7a(action)
-    # ch2_fig7b(action)
+    # ch2_fig6(action)
+    ch2_fig7a(action)
+    ch2_fig7b(action)
     # ch2_fig8(action)
     # ch2_fig9(action)
     # ch2_fig10(action)

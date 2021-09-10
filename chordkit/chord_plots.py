@@ -2,7 +2,64 @@ import pandas as pd
 import numpy as np
 import defaults as de
 from roughness_models import roughness_complex
+from overlap_models import overlap_complex
 from chord_utils import MergedSpectrum, ChordSpectrum, TransposeDomain, plot_line
+
+def overlap_curve(
+    ref_chord: ChordSpectrum,
+    test_chord: ChordSpectrum,
+    *,
+    transpose_domain: TransposeDomain = de.default_transpose_domain,
+    function_type: str = de.default_overlap_function_type,
+    plot: bool = True,
+    normalize: bool = False,
+    options = {
+        'crossterms_only': False,
+        'amp_type': 'MIN',
+        'cutoff': False,
+        'original': False,
+        'show_partials': False
+    }
+):
+
+    overlap_vals = np.zeros(np.shape(transpose_domain.domain))
+
+    if options['crossterms_only']:
+        if options['show_partials']:
+            ref_self_overlap = (overlap_complex(ref_chord, function_type, options=options))['overlap']
+        else:
+            ref_self_overlap = (overlap_complex(ref_chord, function_type, options=options))
+
+    for (idx, position) in enumerate(transpose_domain.domain):
+        # new_test_timbre['fund_multiple'] = cu.slide_timbre(position, test_timbre, chord_struct_type=chord_struct_type)
+        # test_chord = cu.make_chord(test_chord_struct, chord_struct_type, timbre=new_test_timbre, fund_hz=fund_hz)
+        test_chord.transpose(position, transpose_domain.transpose_type)
+        # union = ref_chord.append(test_chord, ignore_index=True)
+
+        union = MergedSpectrum(ref_chord, test_chord)
+
+        if options['show_partials']:
+            curr_overlap_val = (overlap_complex(union, function_type, options=options))['overlap']
+        else:
+            curr_overlap_val = (overlap_complex(union, function_type, options=options))
+
+        if options['crossterms_only']:
+            if options['show_partials']:
+                test_self_overlap = (overlap_complex(ref_chord, function_type, options=options))['overlap']
+            else:
+                test_self_overlap = (overlap_complex(ref_chord, function_type, options=options))
+            curr_overlap_val -= (ref_self_overlap + test_self_overlap)
+
+        overlap_vals[idx] = curr_overlap_val
+
+    if plot:
+        plot_line(transpose_domain.domain, overlap_vals)
+
+    if normalize:
+        plotMax = max(overlap_vals)
+        overlap_vals /= float(plotMax)
+
+    return overlap_vals
 
 def roughness_curve(
     ref_chord: ChordSpectrum,
@@ -15,7 +72,7 @@ def roughness_curve(
     # test_chord_struct: list = de.default_chord_struct,
     # test_timbre: pd.DataFrame = de.default_timbre,
     transpose_domain: TransposeDomain = de.default_transpose_domain,
-    function_type: str = de.default_function_type,
+    function_type: str = de.default_roughness_function_type,
     plot: bool = True,
     normalize: bool = False,
     options = {

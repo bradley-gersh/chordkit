@@ -1,4 +1,3 @@
-import math
 import pandas as pd
 import numpy as np
 from hearing_models import cbw_volk as cbw, bark_zwicker as bark
@@ -76,7 +75,7 @@ def sethares_roughness_pair(x_hz, ref_hz, v_x, v_ref, *, cutoff=False, options =
             v12 = 0
 
     try:
-        return v12 * scaling * (math.exp(-sc['a'] * s * distance) - math.exp(-sc['b'] * s * distance))
+        return v12 * scaling * (np.exp(-sc['a'] * s * distance) - np.exp(-sc['b'] * s * distance))
     except OverflowError:
         print(f"Overflow in computing roughness: a == {sc['a']}, b == {sc['b']}, s == {s}, distance == {distance}")
 
@@ -103,7 +102,7 @@ def parncutt_roughness_pair(x_hz, ref_hz, v_x, v_ref, options = {}):
     distance = abs(x_bark - ref_bark)
 
     if distance < 1.2:
-        return ((math.exp(1)/a) * distance * math.exp(-distance / a)) ** i_factor
+        return ((np.exp(1)/a) * distance * np.exp(-distance / a)) ** i_factor
     else:
         return 0
 

@@ -18,5 +18,6 @@ midi_zero = 8.175798915643707 # Hz value for C(-1). Choosing this as the 'fundam
 default_chord_struct = [0]
 default_chord = cu.ChordSpectrum(default_chord_struct)
 default_chord_struct_type = 'ST-DIFF'
-default_function_type = 'SETHARES'
+default_overlap_function_type = 'BELL'
+default_roughness_function_type = 'SETHARES'
 default_transpose_domain = cu.TransposeDomain(0, 12, 100, 'ST_DIFF')
