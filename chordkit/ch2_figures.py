@@ -2,8 +2,9 @@ from chord_utils import Timbre, MergedSpectrum, ChordSpectrum, TransposeDomain
 from defaults import (SineTone, SetharesTone, FlatSawTimbre, SetharesTimbre, c4, midi_zero, a3, a4, one_octave, two_octaves, two_octaves_symm)
 from chord_plots import overlap_curve, roughness_curve
 from roughness_models import roughness_complex
+from overlap_models import overlap_complex
 from matplotlib import pyplot as plt
-from matplotlib.ticker import MultipleLocator, AutoMinorLocator
+from matplotlib.ticker import MultipleLocator, FixedLocator
 from pair_constants import AUDITORY_CONSTANTS as ac
 import sys
 import numpy as np
@@ -231,15 +232,12 @@ def ch2_fig4(action):
     maj53_triad = ChordSpectrum([0, 4, 7], 'ST_DIFF', timbre=tim, fund_hz=fund)
     maj7_dyad = ChordSpectrum([0, 11], 'ST_DIFF', timbre=tim, fund_hz=fund)
 
-    maj3_diss = roughness_complex(maj3_dyad, 'SETHARES')
-    maj53_diss = roughness_complex(maj53_triad, 'SETHARES')
-    maj7_diss = roughness_complex(maj7_dyad, 'SETHARES')
-
     data = {
-        '[C4, E4]': maj3_diss,
-        '[C4, E4, G4]': maj53_diss,
-        '[C4, B4]': maj7_diss
+        '[C4, E4]': roughness_complex(maj3_dyad, 'SETHARES'),
+        '[C4, E4, G4]': roughness_complex(maj53_triad, 'SETHARES'),
+        '[C4, B4]': roughness_complex(maj7_dyad, 'SETHARES')
     }
+
     plot0_names = ['[C4, E4]', '[C4, E4, G4]']
     plot1_names = ['[C4, E4]', '[C4, B4]']
     plot0_vals = [data[name] for name in plot0_names]
@@ -545,20 +543,22 @@ def ch2_fig9(action):
         }
     )
 
+    # log_ratio = np.log(roughness / overlap)
     ratio = (roughness / overlap)
 
+    # log_ratio = log_ratio / np.max(np.abs(log_ratio))
     ratio = ratio / np.max(ratio)
     roughness = roughness / np.max(roughness)
-    overlap = overlap / np.max(overlap)
 
     # Plot
     fig, ax = plt.subplots()
     fig.set_figwidth(10)
-    ax.plot(T.domain, ratio, 'k')
-    ax.plot(T.domain, roughness, 'k-.')
-    ax.plot(T.domain, overlap, 'k--')
+    # ax.plot(T.domain, log_ratio, 'k', linewidth=3)
+    ax.plot(T.domain, ratio, 'k', linewidth=3)
+    ax.plot(T.domain, roughness, 'k--')
     plt.xlabel('interval (semitones)')
     plt.ylabel('relative roughness\n(arbitrary units)')
+    ax.legend(['relative roughness', 'roughness'], edgecolor='k')
     plt.ylim(ymin=0.0)
     ax.xaxis.set_major_locator(MultipleLocator(1))
     ax.xaxis.set_major_formatter('{x:.0f}')
@@ -687,8 +687,55 @@ def ch2_fig10(action):
     else:
         plt.show()
 
+# Figure 11. Relative roughnesses of a major seventh chord and its subsets.
 def ch2_fig11(action):
     title = 'ch2_fig11'
+
+    tim = SetharesTimbre(12)
+    fund = c4
+
+    chord_names = [
+        ('[C4, E4]', [0, 4]),
+        ('[C4, G4]', [0, 7]),
+        ('[C4, B4]', [0, 11]),
+        ('[E4, G4]', [4, 7]),
+        ('[E4, B4]', [4, 11]),
+        ('[G4, B4]', [7, 11]),
+        ('[C4, E4, G4]', [0, 4, 7]),
+        ('[C4, E4, B4]', [0, 4, 11]),
+        ('[C4, G4, B4]', [0, 7, 11]),
+        ('[E4, G4, B4]', [4, 7, 11]),
+        ('[C4, E4, G4, B4]', [0, 4, 7, 11])
+    ]
+
+    chords = [ChordSpectrum(chord_name[1], 'ST_DIFF', timbre=tim, fund_hz=fund) for chord_name in chord_names]
+    roughnesses = np.array([roughness_complex(chord, 'SETHARES') for chord in chords])
+    overlaps = np.array([overlap_complex(chord, 'BELL') for chord in chords])
+    # log_ratios = np.log(roughnesses / overlaps)
+    ratios = (roughnesses / overlaps)
+
+    # chord_data = zip(chord_names, roughnesses, log_ratios)
+    chord_data = zip(chord_names, roughnesses, ratios)
+    # print(list(zip(*sorted(chord_data, key=lambda chord: chord[1]))))
+    [roughness_sorted_names, roughness_sorted_vals, _] = list(zip(*sorted(chord_data, key=lambda chord: chord[1])))
+    # chord_data = zip(chord_names, roughnesses, log_ratios)
+    chord_data = zip(chord_names, roughnesses, ratios)
+    [ratio_sorted_names, _, ratio_sorted_vals] = list(zip(*sorted(chord_data, key=lambda chord: chord[2])))
+    roughness_sorted_labels = [name[0] for name in roughness_sorted_names]
+    ratio_sorted_labels = [name[0] for name in ratio_sorted_names]
+
+    # Plot
+    fig, ax = plt.subplots(1,2)
+    plt.tight_layout()
+    fig.set_figwidth(10.5)
+    ax[0].bar(roughness_sorted_labels, roughness_sorted_vals, fill=False, hatch='///')
+    ax[1].bar(ratio_sorted_labels, ratio_sorted_vals, fill=False, hatch='///')
+
+    ax[0].set_ylabel('roughness\n(arbitrary units)')
+    ax[1].set_ylabel('relative roughness\n(arbitrary units)')
+    ax[0].tick_params(axis='x', labelrotation=90)
+    ax[1].tick_params(axis='x', labelrotation=90)
+    plt.subplots_adjust(bottom=0.3)
 
     if action.lower() == 'save':
         plt.savefig(f'{title}.png', dpi=350)
@@ -760,7 +807,13 @@ def ch2_fig16(action):
         plt.show()
 
 
-#### APPENDIX FIGURES
+
+
+
+##########################
+#### APPENDIX FIGURES ####
+##########################
+
 # Figure 1b, appendix. My attempt to implement Helmholtz’s composite function.
 def ch2_fig1b_appendix(action):
     title = 'ch2_fig1b_app'
@@ -907,12 +960,12 @@ def __main__(argv):
     # ch2_fig4(action)
     # ch2_fig5(action)
     # ch2_fig6(action)
-    ch2_fig7a(action)
-    ch2_fig7b(action)
+    # ch2_fig7a(action)
+    # ch2_fig7b(action)
     # ch2_fig8(action)
-    ch2_fig9(action)
+    # ch2_fig9(action)
     # ch2_fig10(action)
-    # ch2_fig11a(action)
+    ch2_fig11(action)
     # ch2_fig11b(action)
     # ch2_fig12(action)
     # ch2_fig13(action)
