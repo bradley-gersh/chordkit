@@ -40,7 +40,7 @@ def helmholtz_roughness_pair(x_hz, *, x_p=1, ref_p=1, options={}):
 # Returns the value of the Sethares "sensory dissonance" (roughness)
 # function at frequency x_hz with respect to ref_hz.
 # Based on Sethares 1997, as implemented in Giordano 2015.
-def sethares_roughness_pair(x_hz, ref_hz, v_x, v_ref, *, cutoff=False, options = {
+def sethares_roughness_pair(x_hz, ref_hz, v_x, v_ref, *, options = {
     'original': False,
     'amp_type': 'MIN',
     'cutoff': False,
@@ -54,6 +54,7 @@ def sethares_roughness_pair(x_hz, ref_hz, v_x, v_ref, *, cutoff=False, options =
 
     # Sethares' MATLAB implementation (but not the published paper)
     scaling = 5
+    # scaling = 1
 
     # The following scaling factor is introduced to ensure that the maximum
     # value obtained by the pairwise roughness function is approximately 1.
@@ -62,14 +63,15 @@ def sethares_roughness_pair(x_hz, ref_hz, v_x, v_ref, *, cutoff=False, options =
     if options['original'] == False:
         scaling = 5 / 0.8986
 
-    distance = pair_distance(x_hz, ref_hz)
+    # distance = pair_distance(x_hz, ref_hz)
+    distance = np.abs(x_hz - ref_hz)
 
     # Cutoff: Following Hutchinson and Knopoff 1978, cuts off the Sethares
     # roughness function at 1.2 CBW, which prevents too-remote partials from
     # contributing to the final score. (Check whether this also prevents drift
     # for larger intervals.)
     # Sethares' original does not use this cutoff.
-    if cutoff:
+    if options['cutoff'] == True:
         cbw_limit = 1.2 * cbw(max[x_hz, ref_hz]) / 2
         if distance < ac['slow_beat_limit'] or distance >= cbw_limit:
             v12 = 0
@@ -91,7 +93,7 @@ def cbw_roughness_pair(x_hz, ref_hz, v_x, v_ref, options={ 'amp_type': 'MIN' }):
     else:
         return 0
 
-# From Bigand, Parncutt, and Lerdahl 1996. Note that the volumes are not used
+# From Bigand, Parncutt, and Lerdahl 1996. Note that the volumes are not used.
 def parncutt_roughness_pair(x_hz, ref_hz, v_x, v_ref, options = {}):
     # Parameters asserted in BPL 1996 paper
     a = 0.25

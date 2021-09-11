@@ -11,7 +11,6 @@ def overlap_curve(
     *,
     transpose_domain: TransposeDomain = de.default_transpose_domain,
     function_type: str = de.default_overlap_function_type,
-    plot: bool = True,
     normalize: bool = False,
     options = {
         'crossterms_only': False,
@@ -52,9 +51,6 @@ def overlap_curve(
 
         overlap_vals[idx] = curr_overlap_val
 
-    if plot:
-        plot_line(transpose_domain.domain, overlap_vals)
-
     if normalize:
         plotMax = max(overlap_vals)
         overlap_vals /= float(plotMax)
@@ -73,7 +69,6 @@ def roughness_curve(
     # test_timbre: pd.DataFrame = de.default_timbre,
     transpose_domain: TransposeDomain = de.default_transpose_domain,
     function_type: str = de.default_roughness_function_type,
-    plot: bool = True,
     normalize: bool = False,
     options = {
         'crossterms_only': False,
@@ -129,9 +124,6 @@ def roughness_curve(
             curr_roughness_val -= (ref_self_diss + test_self_diss)
 
         roughness_vals[idx] = curr_roughness_val
-
-    if plot:
-        plot_line(transpose_domain.domain, roughness_vals)
 
     if normalize:
         plotMax = max(roughness_vals)

@@ -11,7 +11,7 @@ def cbw_overlap_pair(x_hz, ref_hz, v_x, v_ref, options={
     cbw_limit = cbw(max([x_hz, ref_hz])) / 2
     distance = pair_distance(x_hz, ref_hz)
 
-    if distance < ac.slow_beat_limit:
+    if distance < ac['slow_beat_limit']:
         return pair_volume(v_x, v_ref, options['amp_type'])
     else:
         return 0
@@ -21,9 +21,9 @@ def cos_overlap_pair(x_hz, ref_hz, v_x, v_ref, options={
     'amp_type': 'MIN'
 }):
     distance = pair_distance(x_hz, ref_hz)
-    flat = cbw_overlap_pair(x_hz, ref_hz, v_x, v_ref, options['amp_type'])
+    flat = cbw_overlap_pair(x_hz, ref_hz, v_x, v_ref, options)
 
-    return flat * 0.5 * (1 + np.cos(np.pi * distance/ac.slow_beat_limit))
+    return flat * 0.5 * (1 + np.cos(np.pi * distance/ac['slow_beat_limit']))
 
 # An imitation of the Sethares (1993) roughness function, but for overlap,
 # using a bell-like function
@@ -43,7 +43,7 @@ def bell_overlap_pair(x_hz, ref_hz, v_x, v_ref, options={
     # Cutoff: Following Hutchinson and Knopoff 1978, cuts off the overlap
     # function at 1.2 CBW, which prevents too-remote partials from
     # contributing to the final score.
-    if options['cutoff']:
+    if options['cutoff'] == True:
         cbw_limit = 1.2 * cbw(max[x_hz, ref_hz]) / 2
         if distance < ac['slow_beat_limit'] or distance >= cbw_limit:
             v12 = 0

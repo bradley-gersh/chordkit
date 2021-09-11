@@ -10,7 +10,8 @@ SETHARES_CONSTANTS = {
 }
 
 AUDITORY_CONSTANTS = {
-    'slow_beat_limit': 15, # +/- Hz limit for zone where two sine waves create sensation of slow beats
+    # 'slow_beat_limit': 15, # +/- Hz limit for zone where two sine waves create sensation of slow beats
+    'slow_beat_limit': 12, # +/- Hz limit for zone where two sine waves create sensation of slow beats
 }
 
 # Volume scale

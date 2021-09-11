@@ -18,13 +18,6 @@ class Timbre:
     def copy(self):
         return Timbre(list(self.partials['fund_multiple']), list(self.partials['amp']))
 
-# Some useful timbres
-basic_saw_timbre = Timbre(range(1, 13), [1/p for p in range(1, 13)])
-sethares_timbre = Timbre(range(1, 8), [0.88 ** p for p in range(0, 7)])
-sine_tone = Timbre([1], [1])
-
-default_fund = 220.0
-
 def sort_partials(partials: pd.DataFrame):
     return partials.reindex(['hz', 'amp', 'note_id', 'fund_multiple', 'hz_orig'], axis=1).sort_values(by = 'hz', ignore_index = True)
 
@@ -191,11 +184,3 @@ class TransposeDomain:
 #         chord = chord.append(new_note, ignore_index = True)
 
 #     return chord.reindex(['hz', 'amp', 'note_id', 'fund_multiple'], axis=1).sort_values(by = 'hz', ignore_index = True)
-
-
-
-
-
-def plot_line(x, y):
-    plt.plot(x, y)
-    plt.show()
