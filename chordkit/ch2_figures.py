@@ -1,5 +1,5 @@
 from chord_utils import Timbre, MergedSpectrum, ChordSpectrum, TransposeDomain
-from defaults import (SineTone, SetharesTone, c4, midi_zero, a3, a4, one_octave, two_octaves, two_octaves_symm)
+from defaults import (SineTone, SetharesTone, FlatSawTimbre, SetharesTimbre, c4, midi_zero, a3, a4, one_octave, two_octaves, two_octaves_symm)
 from chord_plots import overlap_curve, roughness_curve
 from roughness_models import roughness_complex
 from matplotlib import pyplot as plt
@@ -53,10 +53,14 @@ def ch2_fig1a(action):
 def ch2_fig2a(action):
     title = 'ch2_fig2a'
 
+    ref_tone = SineTone(a3)
+    test_tone = SineTone(a3)
+    T = two_octaves_symm
+
     roughness = roughness_curve(
-        sine_tone,
-        sine_tone,
-        transpose_domain=two_octaves_symm,
+        ref_tone,
+        test_tone,
+        transpose_domain=T,
         function_type='SETHARES',
         normalize=True,
         options={
@@ -69,7 +73,7 @@ def ch2_fig2a(action):
 
     # Plot
     _, ax = plt.subplots()
-    plt.plot(two_octaves_symm.domain, roughness, 'k')
+    plt.plot(T.domain, roughness, 'k')
     plt.xlabel('interval (semitones)')
     plt.ylabel('roughness (arbitrary units)')
     plt.ylim(ymin=0.0)
@@ -92,11 +96,14 @@ def ch2_fig2b(action):
 
     # Would make sense to use `sethares_timbre` here, but it has too few partials (7)
     # for the overlap function later.
+    ref_tone = SetharesTone(12, a3)
+    test_tone = SetharesTone(12, a3)
+    T = one_octave
 
     roughness = roughness_curve(
-        sethares_12_tone,
-        sethares_12_tone,
-        transpose_domain=one_octave,
+        ref_tone,
+        test_tone,
+        transpose_domain=T,
         function_type='SETHARES',
         normalize=True,
         options={
@@ -112,7 +119,7 @@ def ch2_fig2b(action):
     # Plot
     fig, ax = plt.subplots()
     fig.set_figwidth(10)
-    plt.plot(one_octave.domain, roughness, 'k')
+    plt.plot(T.domain, roughness, 'k')
     plt.xlabel('interval (semitones)')
     plt.ylabel('roughness (arbitrary units)')
     plt.ylim(ymin=0.0)
@@ -131,7 +138,7 @@ def ch2_fig2b(action):
 def ch2_fig3(action):
     title = 'ch2_fig3'
 
-    tim = sethares_12_timbre
+    tim = SetharesTimbre(12)
     fund = midi_zero
 
     # The lower octave is not doubled, following the holograph score shown at
@@ -217,8 +224,7 @@ def ch2_fig3(action):
 def ch2_fig4(action):
     title = 'ch2_fig4'
 
-    # Use the same timbre as Sethares 1993?
-    tim = sethares_12_timbre
+    tim = SetharesTimbre(12)
     fund = c4
 
     maj3_dyad = ChordSpectrum([0, 4], 'ST_DIFF', timbre=tim, fund_hz=fund)
@@ -286,12 +292,12 @@ def ch2_fig4(action):
 def ch2_fig5(action): # Not working yet
     title = 'ch2_fig5'
 
-    tim = Timbre(range(1, 8), 1)
-    longtim = Timbre(range(1, 15), 1)
+    tim = FlatSawTimbre(7)
+    long_tim = FlatSawTimbre(14)
     fund = a4
 
-    ref_chord_1 = ChordSpectrum([0], 'ST_DIFF', timbre=tim, fund_hz=fund)
-    ref_chord_2 = ChordSpectrum([0], 'ST_DIFF', timbre=longtim, fund_hz=fund)
+    # ref_chord_1 = ChordSpectrum([0], 'ST_DIFF', timbre=tim, fund_hz=fund)
+    ref_chord_2 = ChordSpectrum([0], 'ST_DIFF', timbre=long_tim, fund_hz=fund)
     test_chord = ChordSpectrum([0], 'ST_DIFF', timbre=tim, fund_hz=fund)
 
     T = TransposeDomain(-0.5, 12.5, 150, 'ST_DIFF')
@@ -305,6 +311,7 @@ def ch2_fig5(action): # Not working yet
         options={
           'amp_type': 'MIN',
           'crossterms_only': False,
+          'cutoff': False,
           'original': False,
           'show_partials': False
         }
@@ -319,6 +326,7 @@ def ch2_fig5(action): # Not working yet
         options={
           'amp_type': 'MIN',
           'crossterms_only': True,
+          'cutoff': False,
           'original': False,
           'show_partials': False
         }
@@ -346,7 +354,7 @@ def ch2_fig5(action): # Not working yet
 def ch2_fig6(action):
     title = 'ch2_fig6'
 
-    chord = ChordSpectrum([49, 60, 71], 'ST_DIFF', timbre=saw_12_timbre, fund_hz=midi_zero)
+    chord = ChordSpectrum([49, 60, 71], 'ST_DIFF', timbre=SetharesTimbre(12), fund_hz=midi_zero)
 
     # Plot
     fig, ax = plt.subplots()
@@ -367,11 +375,15 @@ def ch2_fig6(action):
 def ch2_fig7a(action):
     title = 'ch2_fig7a'
 
+    ref_tone = SineTone(a3)
+    test_tone = SineTone(a3)
+    T = two_octaves_symm
+
     overlap = overlap_curve(
-        sine_tone,
-        sine_tone,
-        transpose_domain=two_octaves_symm,
-        function_type='COS',
+        ref_tone,
+        test_tone,
+        transpose_domain=T,
+        function_type='BELL',
         normalize=True,
         options={
           'amp_type': 'MIN',
@@ -383,9 +395,9 @@ def ch2_fig7a(action):
     )
 
     roughness = roughness_curve(
-        sine_tone,
-        sine_tone,
-        transpose_domain=two_octaves_symm,
+        ref_tone,
+        test_tone,
+        transpose_domain=T,
         function_type='SETHARES',
         normalize=True,
         options={
@@ -399,8 +411,8 @@ def ch2_fig7a(action):
 
     # Plot
     _, ax = plt.subplots()
-    ax.plot(two_octaves_symm.domain, overlap, color='k', linestyle='-', linewidth=3)
-    ax.plot(two_octaves_symm.domain, roughness, color='k', linestyle='--', linewidth=1)
+    ax.plot(T.domain, overlap, color='k', linestyle='-', linewidth=3)
+    ax.plot(T.domain, roughness, color='k', linestyle='--', linewidth=1)
     ax.legend(['overlap', 'roughness'], edgecolor='k')
     plt.xlabel('interval (semitones)')
     plt.ylabel('(arbitrary units)')
@@ -421,10 +433,14 @@ def ch2_fig7a(action):
 def ch2_fig7b(action):
     title = 'ch2_fig7b'
 
+    ref_tone = SetharesTone(12, a3)
+    test_tone = SetharesTone(12, a3)
+    T = one_octave
+
     overlap = overlap_curve(
-        sethares_12_tone,
-        sethares_12_tone,
-        transpose_domain=one_octave,
+        ref_tone,
+        test_tone,
+        transpose_domain=T,
         function_type='BELL',
         normalize=False,
         options={
@@ -437,9 +453,9 @@ def ch2_fig7b(action):
     )
 
     roughness = roughness_curve(
-        sethares_12_tone,
-        sethares_12_tone,
-        transpose_domain=one_octave,
+        ref_tone,
+        test_tone,
+        transpose_domain=T,
         function_type='SETHARES',
         normalize=False,
         options={
@@ -456,9 +472,9 @@ def ch2_fig7b(action):
     # Plot
     fig, ax = plt.subplots()
     fig.set_figwidth(10)
-    ax.plot(one_octave.domain, overlap, 'k', linewidth=1)
-    ax.plot(one_octave.domain, ratio, 'k', linewidth=3)
-    ax.plot(one_octave.domain, roughness, 'k--', linewidth=1)
+    ax.plot(T.domain, overlap, 'k', linewidth=1)
+    ax.plot(T.domain, ratio, 'k', linewidth=3)
+    ax.plot(T.domain, roughness, 'k--', linewidth=1)
     ax.legend(['overlap', 'roughness'], edgecolor='k')
     plt.xlabel('interval (semitones)')
     plt.ylabel('(arbitrary units)')
@@ -495,11 +511,15 @@ def ch2_fig8b(action):
 def ch2_fig9(action):
     title = 'ch2_fig9'
 
-    overlap= overlap_curve(
-        sethares_12_tone,
-        sethares_12_tone,
-        transpose_domain=one_octave,
-        function_type='COS',
+    ref_tone = SetharesTone(12, a3)
+    test_tone = SetharesTone(12, a3)
+    T = one_octave
+
+    overlap = overlap_curve(
+        ref_tone,
+        test_tone,
+        transpose_domain=T,
+        function_type='BELL',
         normalize=False,
         options={
           'amp_type': 'MIN',
@@ -511,9 +531,9 @@ def ch2_fig9(action):
     )
 
     roughness = roughness_curve(
-        sethares_12_tone,
-        sethares_12_tone,
-        transpose_domain=one_octave,
+        ref_tone,
+        test_tone,
+        transpose_domain=T,
         function_type='SETHARES',
         normalize=False,
         options={
@@ -534,9 +554,9 @@ def ch2_fig9(action):
     # Plot
     fig, ax = plt.subplots()
     fig.set_figwidth(10)
-    ax.plot(one_octave.domain, ratio, 'k')
-    ax.plot(one_octave.domain, roughness, 'k-.')
-    ax.plot(one_octave.domain, overlap, 'k--')
+    ax.plot(T.domain, ratio, 'k')
+    ax.plot(T.domain, roughness, 'k-.')
+    ax.plot(T.domain, overlap, 'k--')
     plt.xlabel('interval (semitones)')
     plt.ylabel('relative roughness\n(arbitrary units)')
     plt.ylim(ymin=0.0)
@@ -553,11 +573,15 @@ def ch2_fig9(action):
 def ch2_fig9_app(action):
     title = 'ch2_fig9_app'
 
+    ref_tone = SetharesTone(7)
+    test_tone = SetharesTone(7)
+    T = one_octave
+
     overlap1= overlap_curve(
-        sethares_7_tone,
-        sethares_7_tone,
-        transpose_domain=one_octave,
-        function_type='COS',
+        ref_tone,
+        test_tone,
+        transpose_domain=T,
+        function_type='BELL',
         normalize=False,
         options={
           'amp_type': 'MIN',
@@ -569,9 +593,9 @@ def ch2_fig9_app(action):
     )
 
     roughness1 = roughness_curve(
-        sethares_7_tone,
-        sethares_7_tone,
-        transpose_domain=one_octave,
+        ref_tone,
+        test_tone,
+        transpose_domain=T,
         function_type='SETHARES',
         normalize=False,
         options={
@@ -584,9 +608,9 @@ def ch2_fig9_app(action):
     )
 
     # overlap2= overlap_curve(
-    #     sethares_12_tone,
-    #     sethares_12_tone,
-    #     transpose_domain=one_octave,
+    #     ref_tone,
+    #     test_tone,
+    #     transpose_domain=T,
     #     function_type='BELL',
     #     normalize=False,
     #     options={
@@ -599,9 +623,9 @@ def ch2_fig9_app(action):
     # )
 
     # roughness2 = roughness_curve(
-    #     sethares_12_tone,
-    #     sethares_12_tone,
-    #     transpose_domain=one_octave,
+    #     ref_tone,
+    #     test_tone,
+    #     transpose_domain=T,
     #     function_type='SETHARES',
     #     normalize=False,
     #     options={
@@ -634,13 +658,13 @@ def ch2_fig9_app(action):
     # Plot
     fig, ax = plt.subplots()
     fig.set_figwidth(10)
-    # ax.plot(one_octave.domain, ratio1, 'k')
-    # ax.plot(one_octave.domain, strength1, 'k--')
-    ax.plot(one_octave.domain, roughness1, 'k-.')
-    ax.plot(one_octave.domain, overlap1, 'k--')
-    # ax.plot(one_octave.domain, ratio2, 'c')
-    # ax.plot(one_octave.domain, roughness2, 'c-.')
-    # ax.plot(one_octave.domain, overlap2, 'c--')
+    # ax.plot(T.domain, ratio1, 'k')
+    # ax.plot(T.domain, strength1, 'k--')
+    ax.plot(T.domain, roughness1, 'k-.')
+    ax.plot(T.domain, overlap1, 'k--')
+    # ax.plot(T.domain, ratio2, 'c')
+    # ax.plot(T.domain, roughness2, 'c-.')
+    # ax.plot(T.domain, overlap2, 'c--')
     plt.xlabel('interval (semitones)')
     plt.ylabel('relative roughness\n(arbitrary units)')
     ax.xaxis.set_major_locator(MultipleLocator(1))
@@ -747,17 +771,18 @@ def ch2_fig1b_appendix(action):
     #                          figure 60A
     for i in range(10, 11): # For one curve (Helmholtz's figure 61)
         # 10 partials (to match Helmholtz's figure 60A, constant amplitude)
-        tim = Timbre(range(1, i), 1)
-        fund_hz = 264 # Helmholtz's starting pitch: 6/5 * 220, or a just-intoned C3
+        tim = FlatSawTimbre(i)
+        fund = 264 # Helmholtz's starting pitch: 6/5 * 220, or a just-intoned C3
 
-        ref_chord = ChordSpectrum([0], 'ST_DIFF', timbre=tim, fund_hz=fund_hz)
-        test_chord = ChordSpectrum([0], 'ST_DIFF', timbre=tim, fund_hz=fund_hz)
+        ref_chord = ChordSpectrum([0], 'ST_DIFF', timbre=tim, fund_hz=fund)
+        test_chord = ChordSpectrum([0], 'ST_DIFF', timbre=tim, fund_hz=fund)
+        T = one_octave
 
         roughnesses.append(
             roughness_curve(
                 ref_chord,
                 test_chord,
-                transpose_domain=one_octave,
+                transpose_domain=T,
                 function_type='HELMHOLTZ',
                 options={'ref': ref_chord.partials['hz']}
             )
@@ -767,7 +792,7 @@ def ch2_fig1b_appendix(action):
     fig, ax = plt.subplots()
     fig.set_figwidth(10)
     for roughness in roughnesses:
-        plt.plot(one_octave.domain, roughness, 'k')
+        plt.plot(T.domain, roughness, 'k')
     plt.xlabel('interval (semitones)')
     plt.ylabel('roughness (arbitrary units)')
     plt.ylim(ymin=0.0)
@@ -787,11 +812,11 @@ def ch2_fig2b_appendix(action):
     title = 'ch2_fig2b_app'
 
     # 7 partials, all of amplitude 1
-    tim = Timbre(range(1, 8), 1)
-    fund_hz = 500.0
+    tim = FlatSawTimbre(7)
+    fund = 500.0
 
-    ref_chord = ChordSpectrum([0], 'ST_DIFF', timbre=tim, fund_hz=fund_hz)
-    test_chord = ChordSpectrum([0], 'ST_DIFF', timbre=tim, fund_hz=fund_hz)
+    ref_chord = ChordSpectrum([0], 'ST_DIFF', timbre=tim, fund_hz=fund)
+    test_chord = ChordSpectrum([0], 'ST_DIFF', timbre=tim, fund_hz=fund)
 
     T = TransposeDomain(1., 2.3, 2300, 'SCALE_FACTOR')
 
@@ -875,17 +900,17 @@ def __main__(argv):
     if len(argv) > 1:
         action = argv[1].lower()
 
-    ch2_fig1a(action)
-    ch2_fig2a(action)
+    # ch2_fig1a(action)
+    # ch2_fig2a(action)
     # ch2_fig2b(action)
     # ch2_fig3(action)
     # ch2_fig4(action)
     # ch2_fig5(action)
     # ch2_fig6(action)
-    # ch2_fig7a(action)
-    # ch2_fig7b(action)
+    ch2_fig7a(action)
+    ch2_fig7b(action)
     # ch2_fig8(action)
-    # ch2_fig9(action)
+    ch2_fig9(action)
     # ch2_fig10(action)
     # ch2_fig11a(action)
     # ch2_fig11b(action)

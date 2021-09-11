@@ -51,6 +51,10 @@ def overlap_curve(
 
         overlap_vals[idx] = curr_overlap_val
 
+
+    # test_chord has been mutated by .transpose(); need to reset
+    test_chord.reset_partials()
+
     if normalize:
         plotMax = max(overlap_vals)
         overlap_vals /= float(plotMax)
@@ -124,6 +128,9 @@ def roughness_curve(
             curr_roughness_val -= (ref_self_diss + test_self_diss)
 
         roughness_vals[idx] = curr_roughness_val
+
+    # test_chord has been mutated by .transpose(); need to reset
+    test_chord.reset_partials()
 
     if normalize:
         plotMax = max(roughness_vals)

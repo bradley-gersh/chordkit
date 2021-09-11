@@ -11,7 +11,11 @@ class SetharesTimbre(Timbre):
 
 class SineTimbre(Timbre):
     def __init__(self):
-        Timbre.__init__(self, [1], [1])
+        Timbre.__init__(self, [1], 1)
+
+class FlatSawTimbre(Timbre):
+    def __init__(self, partials=12):
+        Timbre.__init__(self, range(1, partials + 1), 1)
 
 class FilteredSawTimbre(Timbre):
     def __init__(self, partials=12):

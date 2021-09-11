@@ -95,6 +95,10 @@ class ChordSpectrum:
         else:
             raise ValueError(f'invalid chord structure type: {self.struct_type}')
 
+    def reset_partials(self):
+        self.set_fund_hz(self.fund_hz_orig)
+        self.partials['hz'] = self.partials['hz_orig']
+
     def set_fund_hz(self, new_fund_hz: float):
         self.fund_hz = new_fund_hz
         self.partials['hz'] = self.partials['fund_multiple'] * new_fund_hz
