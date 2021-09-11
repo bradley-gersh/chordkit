@@ -24,7 +24,6 @@ def sort_partials(partials: pd.DataFrame):
 class MergedSpectrum:
     # Need to overload to merge two chords
     def __init__(self, *args):
-    # def __init__(self, timbre: Timbre, fund_hz: float = default_fund):
         if isinstance(args[0], Timbre):
             self.partials = args[0].partials.copy()
             self.partials['hz'] = self.partials['fund_multiple']
@@ -58,8 +57,8 @@ class ChordSpectrum:
         chord_struct: list,
         chord_struct_type: str = 'ST_DIFF',
         *,
-        timbre: Timbre = basic_saw_timbre,
-        fund_hz: float = default_fund
+        timbre: Timbre = Timbre(range(1, 13), [0.88 ** p for p in range(0, 12)]),
+        fund_hz: float = 220.0
     ):
         self.partials = pd.DataFrame()
         self.struct = chord_struct

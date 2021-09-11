@@ -54,7 +54,6 @@ def sethares_roughness_pair(x_hz, ref_hz, v_x, v_ref, *, options = {
 
     # Sethares' MATLAB implementation (but not the published paper)
     scaling = 5
-    # scaling = 1
 
     # The following scaling factor is introduced to ensure that the maximum
     # value obtained by the pairwise roughness function is approximately 1.
