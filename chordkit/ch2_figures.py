@@ -1,5 +1,5 @@
 from chord_utils import Timbre, MergedSpectrum, ChordSpectrum, TransposeDomain
-from defaults import (SineTone, SetharesTone, FlatSawTimbre, SetharesTimbre, c4, midi_zero, a3, a4, one_octave, two_octaves, two_octaves_symm)
+from defaults import (SineTone, SetharesTone, FlatSawTone, SetharesMajTriad, FlatSawTimbre, SetharesTimbre, c4, midi_zero, a3, a4, one_octave, two_octaves, two_octaves_symm)
 from chord_plots import overlap_curve, roughness_curve
 from roughness_models import roughness_complex
 from overlap_models import overlap_complex
@@ -136,8 +136,10 @@ def ch2_fig2b(action):
         plt.show()
 
 # Figure 3. Sethares roughness for Fratres chords
-def ch2_fig3(action):
-    title = 'ch2_fig3'
+# Figure 13 (also). Sethares roughness and relative roughness for Fratres chords
+def ch2_fig3_13(action):
+    title1 = 'ch2_fig3'
+    title2 = 'ch2_fig13'
 
     tim = SetharesTimbre(12)
     fund = midi_zero
@@ -156,7 +158,7 @@ def ch2_fig3(action):
         [55, 70],
         [52, 67],
         [49, 64],
-        [57, 61]
+        [45, 61]
     ]]
 
     fratres_upper_var_1 = [ChordSpectrum(chord, 'ST_DIFF', timbre=tim, fund_hz=fund) for chord in [
@@ -169,7 +171,7 @@ def ch2_fig3(action):
         [55, 70, 64], # variable 64/60
         [52, 67, 60],
         [49, 64, 57],
-        [57, 61, 52]
+        [45, 61, 52]
     ]]
 
     # The next one includes the other variable sonorities
@@ -183,27 +185,37 @@ def ch2_fig3(action):
         [55, 70, 60], # variable 64/60
         [52, 67, 60],
         [49, 64, 57],
-        [57, 61, 52]
+        [45, 61, 52]
     ]]
 
-    fratres_outer_diss = [
+    fratres_outer_diss = np.array([
         roughness_complex(MergedSpectrum(fratres_drone, chord), 'SETHARES') for chord in fratres_tenths
-    ]
+    ])
 
-    fratres_var_1_diss = [
-        roughness_complex(MergedSpectrum(fratres_drone, chord), 'SETHARES') for chord in fratres_upper_var_1
-    ]
+    # fratres_var_1_diss = [
+        # roughness_complex(MergedSpectrum(fratres_drone, chord), 'SETHARES') for chord in fratres_upper_var_1
+    # ]
 
-    fratres_var_2_diss = [
-        roughness_complex(MergedSpectrum(fratres_drone, chord), 'SETHARES') for chord in fratres_upper_var_2
-    ]
+    # fratres_var_2_diss = [
+        # roughness_complex(MergedSpectrum(fratres_drone, chord), 'SETHARES') for chord in fratres_upper_var_2
+    # ]
+
+    fratres_outer_overlap = np.array([
+        overlap_complex(MergedSpectrum(fratres_drone, chord), 'BELL') for chord in fratres_tenths
+    ])
+
+    fratres_outer_ratio = fratres_outer_diss / fratres_outer_overlap
 
     # Normalize so drone has roughness 1
-    fratres_outer_diss_n = [float(x) / fratres_outer_diss[0] for x in fratres_outer_diss]
-    fratres_var_1_diss_n = [float(x) / fratres_var_1_diss[0] for x in fratres_var_1_diss]
-    fratres_var_2_diss_n = [float(x) / fratres_var_2_diss[0] for x in fratres_var_2_diss]
+    fratres_outer_diss_n = fratres_outer_diss / fratres_outer_diss[0]
+    fratres_outer_ratio_n = fratres_outer_ratio / fratres_outer_ratio[0]
+    # fratres_var_1_diss_n = [float(x) / fratres_var_1_diss[0] for x in fratres_var_1_diss]
+    # fratres_var_2_diss_n = [float(x) / fratres_var_2_diss[0] for x in fratres_var_2_diss]
 
-    # Plot
+    # Plots
+
+    # Fig 3
+    plt.figure(3)
     fig, ax = plt.subplots()
     fig.set_figwidth(10)
     plt.plot(['drone'] + list(range(1,10)), fratres_outer_diss_n, 'k')
@@ -215,11 +227,30 @@ def ch2_fig3(action):
     ax.yaxis.set_label_coords(-0.06, 0.5)
 
     if action.lower() == 'save':
-        plt.savefig(f'{title}.png', dpi=350)
-        print(f'{title}.png saved')
+        plt.savefig(f'{title1}.png', dpi=350)
+        print(f'{title1}.png saved')
 
     else:
-        plt.show()
+        plt.show(block=False)
+
+    # Fig 13
+    plt.figure(13)
+    fig, ax = plt.subplots()
+    fig.set_figwidth(10)
+    plt.plot(['drone'] + list(range(1,10)), fratres_outer_ratio_n, 'k', linewidth=3)
+    plt.plot(['drone'] + list(range(1,10)), fratres_outer_diss_n, 'k--')
+    plt.legend(['relative roughness', 'roughness'])
+    plt.xlabel('section')
+    plt.ylabel('roughness (arbitrary units)')
+    plt.ylim(ymin=0.0)
+    ax.yaxis.set_label_coords(-0.06, 0.5)
+
+    if action.lower() == 'save':
+        plt.savefig(f'{title2}.png', dpi=350)
+        print(f'{title2}.png saved')
+
+    else:
+        plt.show(block=False)
 
 # Figure 4. Discrepancies between Sethares roughness and dissonance.
 def ch2_fig4(action):
@@ -260,7 +291,7 @@ def ch2_fig4(action):
     ax[0,1].stem(maj53_triad.partials['hz'], maj53_triad.partials['amp'], linefmt='k', markerfmt='ko', basefmt=' ')
     ax[0,1].set_title('[C4, E4, G4]')
     ax[0,2].bar(plot0_names, plot0_vals, fill=False, hatch='///')
-    ax[0,2].set_ylim([0, maj53_diss * 1.1])
+    ax[0,2].set_ylim([0, data['[C4, E4, G4'] * 1.1])
     ax[0,2].spines['right'].set_visible(False)
     ax[0,2].spines['top'].set_visible(False)
     ax[0,2].set_ylabel('roughness\n(arbitrary units)')
@@ -290,51 +321,20 @@ def ch2_fig4(action):
 def ch2_fig5(action): # Not working yet
     title = 'ch2_fig5'
 
-    tim = FlatSawTimbre(7)
-    long_tim = FlatSawTimbre(14)
-    fund = a4
+    ref_tone_short = SetharesTone(7)
+    ref_tone_long = SetharesTone(14)
+    test_tone = SetharesTone(7)
+    T = two_octaves
+    # T = TransposeDomain(-0.5, 24.5, 2401, 'ST_DIFF')
 
-    # ref_chord_1 = ChordSpectrum([0], 'ST_DIFF', timbre=tim, fund_hz=fund)
-    ref_chord_2 = ChordSpectrum([0], 'ST_DIFF', timbre=long_tim, fund_hz=fund)
-    test_chord = ChordSpectrum([0], 'ST_DIFF', timbre=tim, fund_hz=fund)
-
-    T = TransposeDomain(-0.5, 12.5, 150, 'ST_DIFF')
-
-    roughness_1 = roughness_curve(
-        ref_chord_2,
-        test_chord,
-        transpose_domain=T,
-        function_type='SETHARES',
-        normalize=True,
-        options={
-          'amp_type': 'MIN',
-          'crossterms_only': False,
-          'cutoff': False,
-          'original': False,
-          'show_partials': False
-        }
-    )
-
-    roughness_2 = roughness_curve(
-        ref_chord_2,
-        test_chord,
-        transpose_domain=T,
-        function_type='SETHARES',
-        normalize=True,
-        options={
-          'amp_type': 'MIN',
-          'crossterms_only': True,
-          'cutoff': False,
-          'original': False,
-          'show_partials': False
-        }
-    )
+    roughness_short = roughness_curve(ref_tone_short, test_tone, transpose_domain=T, function_type='SETHARES', normalize=True)
+    roughness_long = roughness_curve(ref_tone_long, test_tone, transpose_domain=T, function_type='SETHARES', normalize=True)
 
     # Plot
     fig, ax = plt.subplots()
     fig.set_figwidth(10)
-    plt.plot(T.domain, roughness_1, 'k.')
-    plt.plot(T.domain, roughness_2, 'k')
+    plt.plot(T.domain, roughness_short, 'k')
+    plt.plot(T.domain, roughness_long, 'k--')
     plt.xlabel('interval (semitones)')
     plt.ylabel('roughness (arbitrary units)')
     plt.ylim(ymin=0.0)
@@ -348,30 +348,9 @@ def ch2_fig5(action): # Not working yet
     else:
         plt.show()
 
-# Figure 6. A wide chord.
-def ch2_fig6(action):
-    title = 'ch2_fig6'
-
-    chord = ChordSpectrum([49, 60, 71], 'ST_DIFF', timbre=SetharesTimbre(12), fund_hz=midi_zero)
-
-    # Plot
-    fig, ax = plt.subplots()
-    fig.set_figwidth(10)
-    plt.stem(chord.partials['hz'], chord.partials['amp'])
-    plt.xlabel('frequency (Hz)')
-    plt.ylabel('amplitude (arbitrary units)')
-    plt.ylim(ymin=0.0)
-    ax.yaxis.set_label_coords(-0.06, 0.5)
-
-    if action.lower() == 'save':
-        plt.savefig(f'{title}.png', dpi=350)
-        print(f'{title}.png saved')
-    else:
-        plt.show()
-
-# Figure 7a. Pair-overlap curve.
-def ch2_fig7a(action):
-    title = 'ch2_fig7a'
+# Figure 6a. Pair-overlap curve.
+def ch2_fig6a(action):
+    title = 'ch2_fig6a'
 
     ref_tone = SineTone(a3)
     test_tone = SineTone(a3)
@@ -427,9 +406,9 @@ def ch2_fig7a(action):
     else:
         plt.show()
 
-# Figure 7b. Complex overlap curve.
-def ch2_fig7b(action):
-    title = 'ch2_fig7b'
+# Fi6ure 6b. Complex overlap curve.
+def ch2_fig6b(action):
+    title = 'ch2_fig6b'
 
     ref_tone = SetharesTone(12, a3)
     test_tone = SetharesTone(12, a3)
@@ -487,8 +466,61 @@ def ch2_fig7b(action):
     else:
         plt.show()
 
-def ch2_fig8a(action):
-    title = 'ch2_fig8a'
+def ch2_fig7(action):
+    title = 'ch2_fig7'
+
+    ref_tone = SetharesTone(7)
+    test_tone = SetharesTone(7)
+    fund = a3
+    T = one_octave
+    # T = TransposeDomain(-0.5, 12.5, 200, 'ST_DIFF')
+
+    overlap_bell = overlap_curve(ref_tone, test_tone, transpose_domain=T, function_type='BELL')
+    overlap_cos = overlap_curve(ref_tone, test_tone, transpose_domain=T, function_type='COS')
+    overlap_cbw = overlap_curve(ref_tone, test_tone, transpose_domain=T, function_type='CBW')
+    overlap_bell /= np.max(overlap_bell)
+    overlap_cos /= np.max(overlap_cos)
+    overlap_cbw /= np.max(overlap_cbw)
+
+    Ks = [-0.2374, -2.374, -23.74]
+    overlaps_k = [overlap_curve(ref_tone, test_tone, transpose_domain=T, function_type='BELL', options={
+        'amp_type': 'MIN',
+        'crossterms_only': False,
+        'cutoff': False,
+        'show_partials': False,
+        'K': k
+        }) for k in Ks
+    ]
+    overlaps_k = [curve / np.max(curve) for curve in overlaps_k]
+
+    #Plot
+    fig, ax = plt.subplots(2,1)
+    fig.set_figheight(6)
+    fig.set_figwidth(10)
+    plt.tight_layout()
+    plt.subplots_adjust(left=0.16, hspace=0.3, bottom=0.1)
+    ax[0].plot(T.domain, overlap_bell, 'k')
+    ax[0].plot(T.domain, overlap_cos, 'k--')
+    ax[0].plot(T.domain, overlap_cbw, 'k-.')
+    ax[0].legend(['current', 'cos', 'indicator'])
+    ax[0].set_ylim(0, 1.1)
+    ax[1].set_ylim(0, 1.1)
+    ax[1].plot(T.domain, overlaps_k[0], 'k-.')
+    ax[1].plot(T.domain, overlaps_k[1], 'k-')
+    ax[1].plot(T.domain, overlaps_k[2], 'k--')
+    ax[1].legend(['K = -0.24', 'K = -2.4', 'K = -24'])
+    ax[0].xaxis.set_major_locator(MultipleLocator(1))
+    ax[0].xaxis.set_major_formatter('{x:.0f}')
+    ax[1].xaxis.set_major_locator(MultipleLocator(1))
+    ax[1].xaxis.set_major_formatter('{x:.0f}')
+    ax[0].set_xlabel('interval (semitones)')
+    ax[0].set_ylabel('overlap\n(arbitrary units)')
+    ax[0].yaxis.set_label_coords(-0.06, 0.50)
+    ax[1].set_xlabel('interval (semitones)')
+    ax[1].set_ylabel('relative roughness\n(arbitrary units)')
+    ax[1].yaxis.set_label_coords(-0.06, 0.50)
+    fig.add_artist(plt.Text(0.03, 0.75, '(a)', size=16.0, weight='bold'))
+    fig.add_artist(plt.Text(0.03, 0.25, '(b)', size=16.0, weight='bold'))
 
     if action.lower() == 'save':
         plt.savefig(f'{title}.png', dpi=350)
@@ -496,18 +528,9 @@ def ch2_fig8a(action):
     else:
         plt.show()
 
-def ch2_fig8b(action):
-    title = 'ch2_fig8b'
-
-    if action.lower() == 'save':
-        plt.savefig(f'{title}.png', dpi=350)
-        print(f'{title}.png saved')
-    else:
-        plt.show()
-
-# Figure 9. Plot of relative roughness over 1 octave, above A3.
-def ch2_fig9(action):
-    title = 'ch2_fig9'
+# Figure 8. Plot of relative roughness over 1 octave, above A3.
+def ch2_fig8(action):
+    title = 'ch2_fig8'
 
     ref_tone = SetharesTone(12, a3)
     test_tone = SetharesTone(12, a3)
@@ -570,8 +593,8 @@ def ch2_fig9(action):
     else:
         plt.show()
 
-def ch2_fig9_app(action):
-    title = 'ch2_fig9_app'
+def ch2_fig8_app(action):
+    title = 'ch2_fig8_app'
 
     ref_tone = SetharesTone(7)
     test_tone = SetharesTone(7)
@@ -677,9 +700,54 @@ def ch2_fig9_app(action):
     else:
         plt.show()
 
-# Figure 10. Sensitivity of relative roughness to presence of higher partials.
-def ch2_fig10(action):
-    title = 'ch2_fig10'
+# Figure 9. Sensitivity of relative roughness to presence of higher partials.
+def ch2_fig9(action):
+    title = 'ch2_fig9'
+
+    ref_8 = SetharesTone(8)
+    test_8 = SetharesTone(8)
+    ref_9 = SetharesTone(9)
+    test_9 = SetharesTone(9)
+    T = one_octave
+    # T = TransposeDomain(-0.5, 12.5, 11, 'ST_DIFF')
+
+    rough_8 = roughness_curve(ref_8, test_8, transpose_domain=T, function_type='SETHARES', normalize=True)
+    rough_9 = roughness_curve(ref_9, test_9, transpose_domain=T, function_type='SETHARES', normalize=True)
+    overlap_8 = overlap_curve(ref_8, test_8, transpose_domain=T, function_type='BELL', normalize=True)
+    overlap_9 = overlap_curve(ref_9, test_9, transpose_domain=T, function_type='BELL', normalize=True)
+    ratio_8 = rough_8 / overlap_8
+    ratio_9 = rough_9 / overlap_9
+    ratio_8 /= max(ratio_8)
+    ratio_9 /= max(ratio_9)
+
+    # Plots
+    fig, ax = plt.subplots(2,1)
+    fig.set_figheight(6)
+    fig.set_figwidth(10)
+    plt.tight_layout()
+    plt.subplots_adjust(left=0.16, hspace=0.3, bottom=0.1)
+    ax[0].plot(T.domain, overlap_8, 'k')
+    ax[0].plot(T.domain, overlap_9, 'k--')
+    ax[0].legend(['8 partials', '9 partials'])
+    ax[0].set_ylim(0, 1.1)
+    ax[1].set_ylim(0, 1.1)
+    ax[1].plot(T.domain, ratio_8, 'k')
+    ax[1].plot(T.domain, ratio_9, 'k--')
+    ax[1].legend(['8 partials', '9 partials'])
+    ax[0].xaxis.set_major_locator(MultipleLocator(1))
+    ax[0].xaxis.set_major_formatter('{x:.0f}')
+    ax[1].xaxis.set_major_locator(MultipleLocator(1))
+    ax[1].xaxis.set_major_formatter('{x:.0f}')
+    ax[0].set_xlabel('interval (semitones)')
+    ax[0].set_ylabel('overlap\n(arbitrary units)')
+    ax[0].yaxis.set_label_coords(-0.06, 0.50)
+    ax[1].set_xlabel('interval (semitones)')
+    ax[1].set_ylabel('relative roughness\n(arbitrary units)')
+    ax[1].yaxis.set_label_coords(-0.06, 0.50)
+    ax[0].annotate('', xy=(2,0.1), xytext=(2,0.2), arrowprops={'arrowstyle': '->'})
+    ax[1].annotate('', xy=(1.9,0.09), xytext=(1.5,0.03), arrowprops={'arrowstyle': '->'})
+    fig.add_artist(plt.Text(0.03, 0.75, '(a)', size=16.0, weight='bold'))
+    fig.add_artist(plt.Text(0.03, 0.25, '(b)', size=16.0, weight='bold'))
 
     if action.lower() == 'save':
         plt.savefig(f'{title}.png', dpi=350)
@@ -687,9 +755,9 @@ def ch2_fig10(action):
     else:
         plt.show()
 
-# Figure 11. Relative roughnesses of a major seventh chord and its subsets.
-def ch2_fig11(action):
-    title = 'ch2_fig11'
+# Figure 10. Relative roughnesses of a major seventh chord and its subsets.
+def ch2_fig10(action):
+    title = 'ch2_fig10'
 
     tim = SetharesTimbre(12)
     fund = c4
@@ -743,8 +811,64 @@ def ch2_fig11(action):
     else:
         plt.show()
 
-def ch2_fig12(action):
-    title = 'ch2_fig12'
+def ch2_fig11(action):
+    title = 'ch2_fig11'
+
+    ref_triad = SetharesMajTriad(12, a3)
+    test_tone = SetharesTone(12, a3)
+    T = TransposeDomain(-0.5, 17.5, 1801, 'ST_DIFF')
+
+    roughness = roughness_curve(
+        ref_triad,
+        test_tone,
+        transpose_domain=T,
+        function_type='SETHARES'
+    )
+
+    overlap = overlap_curve(
+        ref_triad,
+        test_tone,
+        transpose_domain=T,
+        function_type='BELL'
+    )
+
+    ratio = roughness / overlap
+    ratio = ratio / np.max(ratio)
+
+    # Plot
+    fig, ax = plt.subplots()
+    fig.set_figwidth(10)
+    ax.plot(T.domain, ratio, 'k')
+    plt.xlabel('interval (semitones)')
+    plt.ylabel('relative roughness\n(arbitrary units)')
+    ax.xaxis.set_major_locator(MultipleLocator(1))
+    ax.xaxis.set_major_formatter('{x:.0f}')
+    ax.yaxis.set_label_coords(-0.06, 0.5)
+
+    # Some points to annotate
+    triad_unison_coords = [51, 451, 751]
+    triad_unison = list(zip(
+        [T.domain[i] for i in triad_unison_coords],
+        [ratio[i] for i in triad_unison_coords]
+    ))
+    for point in triad_unison:
+        ax.plot(point[0], point[1], 'o', ms=20, mew=2, mfc='none', mec='k')
+
+    triad_octave_coords = [1251, 1651]
+    triad_octave = list(zip(
+        [T.domain[i] for i in triad_octave_coords],
+        [ratio[i] for i in triad_octave_coords]
+    ))
+    for point in triad_octave:
+        ax.plot(point[0], point[1], 's', ms=20, mew=2, mfc='none', mec='k')
+
+    triad_added_coords = [251, 951, 1151, 1451]
+    triad_added = list(zip(
+        [T.domain[i] for i in triad_added_coords],
+        [ratio[i] for i in triad_added_coords]
+    ))
+    for point in triad_added:
+        ax.plot(point[0], point[1], 'd', ms=20, mew=2, mfc='none', mec='k')
 
     if action.lower() == 'save':
         plt.savefig(f'{title}.png', dpi=350)
@@ -755,41 +879,71 @@ def ch2_fig12(action):
 def ch2_fig13(action):
     title = 'ch2_fig13'
 
+    tim = SetharesTimbre(12)
+    fund = midi_zero
+
+    backdrop_pitches = [
+        [62, 69, 74, 76, 81, 86],
+        [62, 64, 69, 74, 76, 81, 86],
+        [64, 69, 76, 81, 88],
+        [64, 69, 71, 76, 81, 83, 88],
+        [71, 76, 83, 88, 95, 100],
+        [85, 90, 97, 102],
+        [73, 80, 81, 85, 92, 93, 97, 102],
+        [66, 68, 69, 71, 73, 78],
+        [61, 66, 68, 69, 71, 73, 76, 80, 83, 88],
+        [66, 68, 69, 76, 81, 88],
+        [64, 66, 67, 69, 71, 74, 76, 81, 86]
+    ]
+
+    m18m_backdrops = [
+        ChordSpectrum(chord, 'ST_DIFF', timbre=tim, fund_hz=fund) for chord in backdrop_pitches
+    ]
+
+    m18m_backdrop_diss = np.array([
+        roughness_complex(MergedSpectrum(chord), 'SETHARES') for chord in m18m_backdrops
+    ])
+
+    m18m_backdrop_overlap = np.array([
+        overlap_complex(MergedSpectrum(chord), 'BELL') for chord in m18m_backdrops
+    ])
+
+    m18m_backdrop_ratio = m18m_backdrop_diss / m18m_backdrop_overlap
+
+    # Normalize so drone has roughness 1
+    m18m_backdrop_ratio /= m18m_backdrop_ratio[0]
+
+    # Plots
+    fig, ax = plt.subplots()
+    fig.set_figwidth(10)
+    ax.plot(range(1,12), m18m_backdrop_ratio, 'k')
+    ax.xaxis.set_major_locator(MultipleLocator(1))
+    ax.xaxis.set_major_formatter('{x:.0f}')
+    plt.xlabel('section')
+    plt.ylabel('relative roughness of pulsed chord\n(arbitrary units)')
+    plt.ylim(ymin=0.0)
+    ax.yaxis.set_label_coords(-0.06, 0.5)
+
     if action.lower() == 'save':
         plt.savefig(f'{title}.png', dpi=350)
         print(f'{title}.png saved')
     else:
         plt.show()
 
-def ch2_fig14a(action):
-    title = 'ch2_fig14a'
+def ch2_fig14(action):
+    title = 'ch2_fig14'
 
-    if action.lower() == 'save':
-        plt.savefig(f'{title}.png', dpi=350)
-        print(f'{title}.png saved')
-    else:
-        plt.show()
+    tim = SetharesTimbre(12)
+    fund = midi_zero
 
-def ch2_fig14b(action):
-    title = 'ch2_fig14b'
+    m18m_i_pairs = [
 
-    if action.lower() == 'save':
-        plt.savefig(f'{title}.png', dpi=350)
-        print(f'{title}.png saved')
-    else:
-        plt.show()
+    ]
 
-def ch2_fig15a(action):
-    title = 'ch2_fig15a'
+    m18m_ix_loop = [
 
-    if action.lower() == 'save':
-        plt.savefig(f'{title}.png', dpi=350)
-        print(f'{title}.png saved')
-    else:
-        plt.show()
+    ]
 
-def ch2_fig15b(action):
-    title = 'ch2_fig15b'
 
     if action.lower() == 'save':
         plt.savefig(f'{title}.png', dpi=350)
@@ -800,12 +954,40 @@ def ch2_fig15b(action):
 def ch2_fig16(action):
     title = 'ch2_fig16'
 
+    maxDenom = 12
+
+    interval = []
+    overlap_ideal = []
+
+    # Idealized overlap function
+    for denom in range(1, maxDenom + 1):
+        for num in range(denom, (2 * denom) + 1):
+            if np.gcd(num, denom) == 1:
+                interval.append(float(num) / denom)
+                overlap_ideal.append(1 / float(num))
+
+    # Reference
+    ref_tone = FlatSawTone(12)
+    test_tone = FlatSawTone(12)
+    T = TransposeDomain(1.0, 2.0, 1000, 'SCALE_FACTOR')
+
+    overlap = overlap_curve(ref_tone, test_tone, transpose_domain=T, function_type='BELL', normalize=True)
+
+    # Plot
+    fig, ax = plt.subplots()
+    ax.plot(T.domain, overlap, 'k--', linewidth=0.5)
+    ax.stem(interval, overlap_ideal, linefmt='k', markerfmt=' ', basefmt=' ')
+    ax.set_ylim(0)
+    plt.xlabel('interval (ratio)')
+    plt.ylabel('overlap (arbitrary units)')
+    ax.xaxis.set_major_formatter('{x:.1f}')
+    ax.yaxis.set_label_coords(-0.1, 0.5)
+
     if action.lower() == 'save':
         plt.savefig(f'{title}.png', dpi=350)
         print(f'{title}.png saved')
     else:
         plt.show()
-
 
 
 
@@ -956,24 +1138,19 @@ def __main__(argv):
     # ch2_fig1a(action)
     # ch2_fig2a(action)
     # ch2_fig2b(action)
-    # ch2_fig3(action)
+    # ch2_fig3_13(action)
     # ch2_fig4(action)
     # ch2_fig5(action)
     # ch2_fig6(action)
-    # ch2_fig7a(action)
-    # ch2_fig7b(action)
+    # ch2_fig7(action)
     # ch2_fig8(action)
     # ch2_fig9(action)
     # ch2_fig10(action)
-    ch2_fig11(action)
-    # ch2_fig11b(action)
+    # ch2_fig11(action)
     # ch2_fig12(action)
-    # ch2_fig13(action)
+    ch2_fig13(action)
     # ch2_fig14(action)
-    # ch2_fig15(action)
     # ch2_fig16(action)
-    # ch2_fig17(action)
-    # ch2_fig19(action)
 
 
 if __name__ == '__main__':

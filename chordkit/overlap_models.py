@@ -4,11 +4,12 @@ from pair_constants import SETHARES_CONSTANTS as sc, AUDITORY_CONSTANTS as ac, p
 from chord_utils import MergedSpectrum
 
 # Returns overlap contribution of two partials, based on an indicator
-# function on the critical bandwidth, scaled to the amplitude of the partial.
+# function on the overlap zone, scaled to the amplitude of the partial.
+# This is called "cbw" because it pairs with the pair-roughness function that
+# uses an indicator function on the critical bandwidth, but the CBW is not used.
 def cbw_overlap_pair(x_hz, ref_hz, v_x, v_ref, options={
     'amp_type': 'MIN'
 }):
-    cbw_limit = cbw(max([x_hz, ref_hz])) / 2
     distance = pair_distance(x_hz, ref_hz)
 
     if distance < ac['slow_beat_limit']:
@@ -29,6 +30,7 @@ def cos_overlap_pair(x_hz, ref_hz, v_x, v_ref, options={
 # using a bell-like function
 def bell_overlap_pair(x_hz, ref_hz, v_x, v_ref, options={
     'amp_type': 'MIN',
+    'K': -2.374,
     'cutoff': False
 }):
     s = sc['s_star'] / (sc['s1'] * min([x_hz, ref_hz]) + sc['s2'])
@@ -36,7 +38,10 @@ def bell_overlap_pair(x_hz, ref_hz, v_x, v_ref, options={
 
     # The following scaling factor is introduced to ensure that the maximum
     # value obtained by the pairwise roughness function is approximately 1.
-    scaling = -2.374
+    # 'K' can be overriden in the options dictionary
+    K = -2.374
+    if 'K' in options:
+        K = options['K']
 
     distance = pair_distance(x_hz, ref_hz)
 
@@ -49,7 +54,7 @@ def bell_overlap_pair(x_hz, ref_hz, v_x, v_ref, options={
             v12 = 0
 
     try:
-        return v12 * np.exp(scaling * sc['b'] * s * distance)
+        return v12 * np.exp(K * sc['b'] * s * distance)
     except OverflowError:
         print(f'Overflow in computing overlap: b == {sc["b"]}, s == {s}, distance == {distance}')
 

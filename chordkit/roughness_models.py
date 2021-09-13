@@ -3,7 +3,6 @@ import numpy as np
 from hearing_models import cbw_volk as cbw, bark_zwicker as bark
 from pair_constants import SETHARES_CONSTANTS as sc, AUDITORY_CONSTANTS as ac, pair_volume, pair_distance
 from chord_utils import MergedSpectrum
-from matplotlib import pyplot as plt
 
 # This file contains both the individual pairwise models used for assessing the
 # roughness of partial pairs and the summing function that adds up all such
@@ -162,7 +161,7 @@ def roughness_complex(
                 if options['show_partials'] == True and rough_vals[i][j] > rough_limit:
                     rough_partials.append((i, j))
 
-    # Pairwise evaluations, as used by Hutchinson/Knopoff, Sethares, Parncutt.
+    # Pairwise evaluations, as used by Hutchinson/Knopoff, Sethares, Parncutt)
     else:
         for i in range(n - 1):
             for j in range(i + 1, n):

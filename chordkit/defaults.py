@@ -62,6 +62,10 @@ class SetharesTone(ChordSpectrum):
     def __init__(self, partials=7, fund=default_fund):
         ChordSpectrum.__init__(self, [0], 'ST_DIFF', timbre=SetharesTimbre(partials), fund_hz=fund)
 
+class FlatSawTone(ChordSpectrum):
+    def __init__(self, partials=12, fund=default_fund):
+        ChordSpectrum.__init__(self, [0], 'ST_DIFF', timbre=FlatSawTimbre(partials), fund_hz=fund)
+
 class FilteredSawTone(ChordSpectrum):
     def __init__(self, partials=12, fund=default_fund):
         ChordSpectrum.__init__(self, [0], 'ST_DIFF', timbre=FilteredSawTimbre(partials), fund_hz=fund)
