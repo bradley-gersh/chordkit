@@ -32,6 +32,7 @@ class DefaultTimbre(SetharesTimbre):
 a4 = 440.0
 a3 = 220.0
 c4 = 261.6255653005986
+d4 = 293.6647679174076
 
 # Hz value for C(-1). Choosing this as the 'fundamental' allows MIDI numbers
 # to be used for specifying chords.

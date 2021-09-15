@@ -1,5 +1,5 @@
 from chord_utils import Timbre, MergedSpectrum, ChordSpectrum, TransposeDomain
-from defaults import (SineTone, SetharesTone, FlatSawTone, SetharesMajTriad, FlatSawTimbre, SetharesTimbre, c4, midi_zero, a3, a4, one_octave, two_octaves, two_octaves_symm)
+from defaults import (SineTone, SetharesTone, FlatSawTone, SetharesMajTriad, FlatSawTimbre, SetharesTimbre, c4, d4, midi_zero, a3, a4, one_octave, two_octaves, two_octaves_symm)
 from chord_plots import overlap_curve, roughness_curve
 from roughness_models import roughness_complex
 from overlap_models import overlap_complex
@@ -291,7 +291,7 @@ def ch2_fig4(action):
     ax[0,1].stem(maj53_triad.partials['hz'], maj53_triad.partials['amp'], linefmt='k', markerfmt='ko', basefmt=' ')
     ax[0,1].set_title('[C4, E4, G4]')
     ax[0,2].bar(plot0_names, plot0_vals, fill=False, hatch='///')
-    ax[0,2].set_ylim([0, data['[C4, E4, G4'] * 1.1])
+    ax[0,2].set_ylim([0, data['[C4, E4, G4]'] * 1.1])
     ax[0,2].spines['right'].set_visible(False)
     ax[0,2].spines['top'].set_visible(False)
     ax[0,2].set_ylabel('roughness\n(arbitrary units)')
@@ -301,7 +301,7 @@ def ch2_fig4(action):
     ax[1,1].stem(maj7_dyad.partials['hz'], maj7_dyad.partials['amp'], linefmt='k', markerfmt='ko', basefmt=' ')
     ax[1,1].set_title('[C4, B4]')
     ax[1,2].bar(plot1_names, plot1_vals, fill=False, hatch='///')
-    ax[1,2].set_ylim([0, maj53_diss * 1.1])
+    ax[1,2].set_ylim([0, data['[C4, E4, G4]'] * 1.1])
     ax[1,2].spines['right'].set_visible(False)
     ax[1,2].spines['top'].set_visible(False)
     ax[1,2].set_ylabel('roughness\n(arbitrary units)')
@@ -930,19 +930,89 @@ def ch2_fig13(action):
     else:
         plt.show()
 
-def ch2_fig14(action):
-    title = 'ch2_fig14'
+def ch2_fig14a(action):
+    title = 'ch2_fig14a'
 
     tim = SetharesTimbre(12)
-    fund = midi_zero
+    fund_i = d4
 
-    m18m_i_pairs = [
-
+    m18m_i_arch_a = [
+        [0,7,12,14,19,24,4,-3,-8],
+        [0,7,12,14,19,24,4,-8,-15],
+        [0,7,12,14,19,24,16,-8,-15],
+        [0,7,12,14,19,24,16,9,-12,-19],
+        [0,7,12,14,19,24,16,-8,-15],
+        [0,7,12,14,19,24,4,-8,-15],
+        [0,7,12,14,19,24,4,-3,-8],
     ]
 
-    m18m_ix_loop = [
-
+    m18m_i_arch_b = [
+        [0,7,12,14,19,24,4,2,-1,-8],
+        [0,7,12,14,19,24,14,4,-8,-13],
+        [0,7,12,14,19,24,16,14,-13,-20],
+        [0,7,12,14,19,24,16,11,-12,-17],
+        [0,7,12,14,19,24,16,14,-13,-20],
+        [0,7,12,14,19,24,14,4,-8,-13],
+        [0,7,12,14,19,24,4,2,-1,-8],
     ]
+
+    a_rough = np.array([roughness_complex(MergedSpectrum(ChordSpectrum(chord, 'ST_DIFF', timbre=tim, fund_hz=fund_i)), function_type='SETHARES') for chord in m18m_i_arch_a])
+    a_overlap = np.array([overlap_complex(MergedSpectrum(ChordSpectrum(chord, 'ST_DIFF', timbre=tim, fund_hz=fund_i)), function_type='BELL') for chord in m18m_i_arch_a])
+    a_ratio = a_rough / a_overlap
+    a_ratio /= np.max(a_ratio)
+
+    b_rough = np.array([roughness_complex(MergedSpectrum(ChordSpectrum(chord, 'ST_DIFF', timbre=tim, fund_hz=fund_i)), function_type='SETHARES') for chord in m18m_i_arch_b])
+    b_overlap = np.array([overlap_complex(MergedSpectrum(ChordSpectrum(chord, 'ST_DIFF', timbre=tim, fund_hz=fund_i)), function_type='BELL') for chord in m18m_i_arch_b])
+    b_ratio = b_rough / b_overlap
+    b_ratio /= np.max(b_ratio)
+
+    chord_names = ['I-a', 'I-b', 'I-c', 'I-d', 'I-c', 'I-b', 'I-a']
+
+    # Plot
+    fig, ax = plt.subplots()
+    fig.set_figwidth(10)
+    ax.bar(chord_names, a_ratio, fill=False)
+    ax.bar(chord_names, b_ratio, fill=False, hatch='///')
+    plt.xlabel('chord pair (see example)')
+    plt.ylabel('relative roughness\n(arbitrary units)')
+    plt.ylim(ymin=0.5, ymax=1.5)
+    ax.yaxis.set_label_coords(-0.06, 0.5)
+
+    if action.lower() == 'save':
+        plt.savefig(f'{title}.png', dpi=350)
+        print(f'{title}.png saved')
+    else:
+        plt.show()
+
+def ch2_fig14b(action):
+    title = 'ch2_fig14b'
+
+    tim = SetharesTimbre(12)
+    fund_ix = midi_zero
+    m18m_ix_backdrop = [61, 66, 68, 69, 71, 73, 76, 80, 83, 88]
+    m18m_ix_loop_top = [
+        [],
+        [45,52,61,68],
+        [42,49,57,64],
+        [42,47,57,64],
+        [44,49,59,64]
+    ]
+    m18m_ix_loop = [m18m_ix_backdrop + chord for chord in m18m_ix_loop_top]
+
+    sect_ix_rough = np.array([roughness_complex(MergedSpectrum(ChordSpectrum(chord, 'ST_DIFF', timbre=tim, fund_hz=fund_ix)), function_type='SETHARES') for chord in m18m_ix_loop])
+    sect_ix_overlap = np.array([overlap_complex(MergedSpectrum(ChordSpectrum(chord, 'ST_DIFF', timbre=tim, fund_hz=fund_ix)), function_type='BELL') for chord in m18m_ix_loop])
+    sect_ix_ratio = sect_ix_rough / sect_ix_overlap
+    sect_ix_ratio /= np.max(sect_ix_ratio)
+
+    # Plot
+    fig, ax = plt.subplots()
+    fig.set_figwidth(5)
+    ax.plot(['backdrop alone'] + list(range(1, 5)), sect_ix_ratio, 'k')
+    plt.xlabel('chord (see example)')
+    plt.ylabel('relative roughness\n(arbitrary units)')
+    plt.ylim(ymin=0.5, ymax=1.5)
+    ax.yaxis.set_label_coords(-0.1, 0.5)
+    plt.subplots_adjust(left=0.16)
 
 
     if action.lower() == 'save':
@@ -1148,8 +1218,9 @@ def __main__(argv):
     # ch2_fig10(action)
     # ch2_fig11(action)
     # ch2_fig12(action)
-    ch2_fig13(action)
-    # ch2_fig14(action)
+    # ch2_fig13(action)
+    # ch2_fig14a(action)
+    ch2_fig14b(action)
     # ch2_fig16(action)
 
 
