@@ -1,8 +1,8 @@
 import pandas as pd
 import numpy as np
-from hearing_models import cbw_volk as cbw, bark_zwicker as bark
-from pair_constants import SETHARES_CONSTANTS as sc, AUDITORY_CONSTANTS as ac, pair_volume, pair_distance
-from chord_utils import MergedSpectrum
+from chordkit.hearing_models import cbw_volk as cbw, bark_zwicker as bark
+from chordkit.pair_constants import SETHARES_CONSTANTS as sc, AUDITORY_CONSTANTS as ac, pair_volume, pair_distance
+from chordkit.chord_utils import MergedSpectrum
 
 # This file contains both the individual pairwise models used for assessing the
 # roughness of partial pairs and the summing function that adds up all such
@@ -47,7 +47,9 @@ def sethares_roughness_pair(x_hz, ref_hz, v_x, v_ref, *, options = {
     s = sc['s_star'] / (sc['s1'] * min([x_hz, ref_hz]) + sc['s2'])
 
     if options['original'] == True:
-        options['amp_type'] = 'PRODUCT'
+        # This line not based on the Sethares 1993 paper, but on the implementation
+        # on his website, https://sethares.engr.wisc.edu/comprog.html
+        options['amp_type'] = 'MIN'
 
     v12 = pair_volume(v_x, v_ref, options['amp_type'])
 

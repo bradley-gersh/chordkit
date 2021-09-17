@@ -1,12 +1,17 @@
 # Constants and functions shared between pairwise function assessing overlap and roughness of partials
 
-# Parameters fit by Sethares 1993. Reformulated version from Giordano 2015.
+# Parameters fit by Sethares 1993.
 SETHARES_CONSTANTS = {
-    'a': 3.51, # From http://sethares.engr.wisc.edu/comprog.html; paper has 3.
     'b': 5.75,
     's_star': 0.24,
-    's1': 0.0207, # From http://sethares.engr.wisc.edu/comprog.html; paper has 0.021
-    's2': 18.96 # From http://sethares.engr.wisc.edu/comprog.html; paper has 19
+    # Constants as in Sethares's implementation on http://sethares.engr.wisc.edu/comprog.html
+    # 'a': 3.51, # From http://sethares.engr.wisc.edu/comprog.html; paper has 3.5
+    # 's1': 0.0207, # From http://sethares.engr.wisc.edu/comprog.html; paper has 0.021
+    # 's2': 18.96 # From http://sethares.engr.wisc.edu/comprog.html; paper has 19
+    # Constants as in Sethares 1993:
+    'a': 3.5,
+    's1': 0.021,
+    's2': 19
 }
 
 AUDITORY_CONSTANTS = {

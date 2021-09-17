@@ -12,7 +12,7 @@ class Timbre:
             'amp': np.ones_like(fund_multiple)
         })
 
-        if amp != 1:
+        if type(amp) != int or amp != 1:
             self.partials['amp'] = amp
 
     def copy(self):
