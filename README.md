@@ -1,6 +1,6 @@
 # chordkit
 
-Basic chord utilities for turning MIDI data into frequency (Hz) data
+Utility for graphing computations of roughness and overlap based on Sethares's 1993 paper and updates.
 
 ## Dependencies
 
@@ -51,3 +51,10 @@ test_chord = ck.Chord([0])
 # 12.5 semitones above the ref_chord.)
 rough = ck.roughness_curve(ref_chord, test_chord, plot=True)
 ```
+
+## References
+
+- Sethares, William. 1993. "Local Consonance and the Relationship Between Timbre and Scale." Journal of the Acoustical Society of America 94, no. 1: 1218–1222.
+- Terhardt, Ernst, Gerhard Stoll, and Manfred Seewann. 1982. "Algorithm for Extraction of Pitch and Pitch Salience from Complex Tonal Signals." Journal of the Acoustical Society of America 71, no. 3: 679–688.
+- Völk, Florian. 2015. "Updated Analytical Expressions for Critical Bandwidth and Critical-Band Rate." DAGA 2015, Nürnberg.
+- Zwicker, Eberhard, and Ernst Terhardt. 1980. "Analytical Expressions for Critical-Band Rate and Critical Bandwidth as a Function of Frequency." Journal of the Acoustical Society of America 68, no. 5: 1523-1525.
