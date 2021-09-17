@@ -1,4 +1,4 @@
-import math
+import numpy as np
 
 # Implementation of Bark formula (eq. 6) from Terhardt, Stoll, and Seewann 1982.
 # Uses the Zwicker and Terhardt 1980 convention. See
@@ -9,7 +9,7 @@ import math
 # See too Schroeder/Atal/Hall 1979, Zwicker 1961.)
 def bark_zwicker(hz):
     khz = hz / 1000
-    return 13 * math.atan(0.76 * khz) + 3.5 * math.atan((khz / 7.5) ** 2)
+    return 13 * np.atan(0.76 * khz) + 3.5 * np.atan((khz / 7.5) ** 2)
 
 # Critical bandwidth, using Volk 2015
 def cbw_volk(hz):

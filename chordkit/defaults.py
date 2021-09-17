@@ -1,5 +1,4 @@
-import numpy as np
-from chord_utils import Timbre, ChordSpectrum, TransposeDomain
+from chordkit.chord_utils import Timbre, ChordSpectrum, TransposeDomain
 
 ###########
 # TIMBRES #

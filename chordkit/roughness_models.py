@@ -1,8 +1,7 @@
-import pandas as pd
 import numpy as np
-from hearing_models import cbw_volk as cbw, bark_zwicker as bark
-from pair_constants import SETHARES_CONSTANTS as sc, AUDITORY_CONSTANTS as ac, pair_volume, pair_distance
-from chord_utils import MergedSpectrum
+from chordkit.hearing_models import cbw_volk as cbw, bark_zwicker as bark
+from chordkit.pair_constants import SETHARES_CONSTANTS as sc, AUDITORY_CONSTANTS as ac, pair_volume, pair_distance
+from chordkit.chord_utils import MergedSpectrum
 
 # This file contains both the individual pairwise models used for assessing the
 # roughness of partial pairs and the summing function that adds up all such

@@ -15,3 +15,7 @@ In a directory with access to the package, run Python. Import the package:
 ```python
 import chordkit as ck
 ```
+
+## Tests
+
+Verification tests are run with `make test`.

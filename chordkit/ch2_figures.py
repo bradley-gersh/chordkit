@@ -1,13 +1,13 @@
-from chord_utils import Timbre, MergedSpectrum, ChordSpectrum, TransposeDomain
-from defaults import (SineTone, SetharesTone, FlatSawTone, SetharesMajTriad, FlatSawTimbre, SetharesTimbre, c4, d4, midi_zero, a3, a4, one_octave, two_octaves, two_octaves_symm)
-from chord_plots import overlap_curve, roughness_curve
-from roughness_models import roughness_complex
-from overlap_models import overlap_complex
-from matplotlib import pyplot as plt
-from matplotlib.ticker import MultipleLocator, FixedLocator
-from pair_constants import AUDITORY_CONSTANTS as ac
-import sys
 import numpy as np
+from matplotlib.ticker import MultipleLocator
+from matplotlib import pyplot as plt
+import sys
+from chordkit.chord_utils import MergedSpectrum, ChordSpectrum, TransposeDomain
+from chordkit.defaults import (SineTone, SetharesTone, FlatSawTone, SetharesMajTriad, FlatSawTimbre, SetharesTimbre, c4, d4, midi_zero, a3, a4, one_octave, two_octaves, two_octaves_symm)
+from chordkit.chord_plots import overlap_curve, roughness_curve
+from chordkit.roughness_models import roughness_complex
+from chordkit.overlap_models import overlap_complex
+from chordkit.pair_constants import AUDITORY_CONSTANTS as ac
 
 # Dissertation ch. 2, figure 1
 # Figure 1a. A plot of Helmholtz’s pair-roughness function (Helmholtz 1895, appendix XV)
