@@ -4,13 +4,11 @@ Basic chord utilities for turning MIDI data into frequency (Hz) data
 
 ## Dependencies
 
-This package runs on Python 3 and requires music21.
-
-## Installation
+This package runs on Python 3 and requires NumPy, Pandas, and Matplotlib to be installed.
 
 ## Usage
 
-In a directory with access to the package, run Python. Import the package:
+In a directory with access to the `chordkit` package, run Python and import the package:
 
 ```python
 import chordkit as ck
@@ -30,7 +28,11 @@ The primary classes of the package are the following:
   - `timbre`: specifies the timbre used by each tone in the chord. If unspecified, the default timbre has 12 harmonic overtones, where overtone _p_ has amplitude 0.88^_p_.
   - `fund_hz`: specifies the frequency (Hz) of the reference for `chord_structure`. If unspecified, the default is `fund_hz = 220.0`.
 
-## Sample usages
+Verification tests are run with `make test`.
+
+## Sample usage
+
+Several examples of use will be found in `ch2_figures.py`, which generates various graphs seen in the dissertation.
 
 ### Print the Sethares graph of roughness of a single pitch
 
@@ -48,12 +50,4 @@ test_chord = ck.Chord([0])
 # 220.0 Hz, and the test_chord sweeps from 0.5 semitones below the ref_chord to
 # 12.5 semitones above the ref_chord.)
 rough = ck.roughness_curve(ref_chord, test_chord, plot=True)
-```
-
-## Tests
-
-Verification tests are run with `make test`.
-
-```
-
 ```

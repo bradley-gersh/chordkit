@@ -150,55 +150,23 @@ def ch2_fig3_13(action):
 
     fratres_tenths = [ChordSpectrum(chord, 'ST_DIFF', timbre=tim, fund_hz=fund) for chord in [
         [],
-        [73, 88],
-        [69, 85],
-        [65, 81],
-        [62, 77],
-        [58, 74],
-        [55, 70],
-        [52, 67],
-        [49, 64],
-        [45, 61]
+        # data temporarily redacted
     ]]
 
     fratres_upper_var_1 = [ChordSpectrum(chord, 'ST_DIFF', timbre=tim, fund_hz=fund) for chord in [
         [],
-        [73, 88, 81],
-        [69, 85, 76],
-        [65, 81, 72],
-        [62, 77, 72], # variable 72/69
-        [58, 74, 69], # variable 69/64
-        [55, 70, 64], # variable 64/60
-        [52, 67, 60],
-        [49, 64, 57],
-        [45, 61, 52]
+        # data temporarily redacted
     ]]
 
     # The next one includes the other variable sonorities
     fratres_upper_var_2 = [ChordSpectrum(chord, 'ST_DIFF', timbre=tim, fund_hz=fund) for chord in [
         [],
-        [73, 88, 81],
-        [69, 85, 76],
-        [65, 81, 72],
-        [62, 77, 69], # variable 72/69
-        [58, 74, 64], # variable 69/64
-        [55, 70, 60], # variable 64/60
-        [52, 67, 60],
-        [49, 64, 57],
-        [45, 61, 52]
+        # data temporarily redacted
     ]]
 
     fratres_outer_diss = np.array([
         roughness_complex(MergedSpectrum(fratres_drone, chord), 'SETHARES') for chord in fratres_tenths
     ])
-
-    # fratres_var_1_diss = [
-        # roughness_complex(MergedSpectrum(fratres_drone, chord), 'SETHARES') for chord in fratres_upper_var_1
-    # ]
-
-    # fratres_var_2_diss = [
-        # roughness_complex(MergedSpectrum(fratres_drone, chord), 'SETHARES') for chord in fratres_upper_var_2
-    # ]
 
     fratres_outer_overlap = np.array([
         overlap_complex(MergedSpectrum(fratres_drone, chord), 'BELL') for chord in fratres_tenths
@@ -209,8 +177,6 @@ def ch2_fig3_13(action):
     # Normalize so drone has roughness 1
     fratres_outer_diss_n = fratres_outer_diss / fratres_outer_diss[0]
     fratres_outer_ratio_n = fratres_outer_ratio / fratres_outer_ratio[0]
-    # fratres_var_1_diss_n = [float(x) / fratres_var_1_diss[0] for x in fratres_var_1_diss]
-    # fratres_var_2_diss_n = [float(x) / fratres_var_2_diss[0] for x in fratres_var_2_diss]
 
     # Plots
 
@@ -219,8 +185,6 @@ def ch2_fig3_13(action):
     fig, ax = plt.subplots()
     fig.set_figwidth(10)
     plt.plot(['drone'] + list(range(1,10)), fratres_outer_diss_n, 'k')
-    # plt.plot(['drone'] + list(range(1,10)), fratres_var_1_diss_n, 'k')
-    # plt.plot(['drone'] + list(range(1,10)), fratres_var_2_diss_n, 'k')
     plt.xlabel('section')
     plt.ylabel('roughness (arbitrary units)')
     plt.ylim(ymin=0.0)
@@ -630,36 +594,6 @@ def ch2_fig8_app(action):
         }
     )
 
-    # overlap2= overlap_curve(
-    #     ref_tone,
-    #     test_tone,
-    #     transpose_domain=T,
-    #     function_type='BELL',
-    #     normalize=False,
-    #     options={
-    #       'amp_type': 'MIN',
-    #       'crossterms_only': False,
-    #       'cutoff': False,
-    #       'original': False,
-    #       'show_partials': False
-    #     }
-    # )
-
-    # roughness2 = roughness_curve(
-    #     ref_tone,
-    #     test_tone,
-    #     transpose_domain=T,
-    #     function_type='SETHARES',
-    #     normalize=False,
-    #     options={
-    #       'amp_type': 'MIN',
-    #       'crossterms_only': False,
-    #       'cutoff': False,
-    #       'original': False,
-    #       'show_partials': False
-    #     }
-    # )
-
     roughness1 = roughness1 / max(roughness1)
     overlap1 = overlap1 / max(overlap1)
 
@@ -883,17 +817,7 @@ def ch2_fig13(action):
     fund = midi_zero
 
     backdrop_pitches = [
-        [62, 69, 74, 76, 81, 86],
-        [62, 64, 69, 74, 76, 81, 86],
-        [64, 69, 76, 81, 88],
-        [64, 69, 71, 76, 81, 83, 88],
-        [71, 76, 83, 88, 95, 100],
-        [85, 90, 97, 102],
-        [73, 80, 81, 85, 92, 93, 97, 102],
-        [66, 68, 69, 71, 73, 78],
-        [61, 66, 68, 69, 71, 73, 76, 80, 83, 88],
-        [66, 68, 69, 76, 81, 88],
-        [64, 66, 67, 69, 71, 74, 76, 81, 86]
+        # data temporarily redacted
     ]
 
     m18m_backdrops = [
@@ -937,23 +861,11 @@ def ch2_fig14a(action):
     fund_i = d4
 
     m18m_i_arch_a = [
-        [0,7,12,14,19,24,4,-3,-8],
-        [0,7,12,14,19,24,4,-8,-15],
-        [0,7,12,14,19,24,16,-8,-15],
-        [0,7,12,14,19,24,16,9,-12,-19],
-        [0,7,12,14,19,24,16,-8,-15],
-        [0,7,12,14,19,24,4,-8,-15],
-        [0,7,12,14,19,24,4,-3,-8],
+        # data temporarily redacted
     ]
 
     m18m_i_arch_b = [
-        [0,7,12,14,19,24,4,2,-1,-8],
-        [0,7,12,14,19,24,14,4,-8,-13],
-        [0,7,12,14,19,24,16,14,-13,-20],
-        [0,7,12,14,19,24,16,11,-12,-17],
-        [0,7,12,14,19,24,16,14,-13,-20],
-        [0,7,12,14,19,24,14,4,-8,-13],
-        [0,7,12,14,19,24,4,2,-1,-8],
+        # data temporarily redacted
     ]
 
     a_rough = np.array([roughness_complex(MergedSpectrum(ChordSpectrum(chord, 'ST_DIFF', timbre=tim, fund_hz=fund_i)), function_type='SETHARES') for chord in m18m_i_arch_a])
@@ -989,13 +901,10 @@ def ch2_fig14b(action):
 
     tim = SetharesTimbre(12)
     fund_ix = midi_zero
-    m18m_ix_backdrop = [61, 66, 68, 69, 71, 73, 76, 80, 83, 88]
+    m18m_ix_backdrop = [] # data temporarily redacted
     m18m_ix_loop_top = [
         [],
-        [45,52,61,68],
-        [42,49,57,64],
-        [42,47,57,64],
-        [44,49,59,64]
+        # data temporarily redacted
     ]
     m18m_ix_loop = [m18m_ix_backdrop + chord for chord in m18m_ix_loop_top]
 
