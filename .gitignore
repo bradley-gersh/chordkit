@@ -1,6 +1,7 @@
 .DS_store
 chordkit/__pycache__/*
 tests/__pycache__/*
+__pycache__/*
 .venv
 .env
 .pytest_cache

@@ -1,9 +1,9 @@
-import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 import chordkit.defaults as de
 from chordkit.roughness_models import roughness_complex
 from chordkit.overlap_models import overlap_complex
-from chordkit.chord_utils import MergedSpectrum, ChordSpectrum, TransposeDomain
+from chordkit.chord_utils import MergedSpectrum, ChordSpectrum, TransposeDomain, Timbre
 
 def overlap_curve(
     ref_chord: ChordSpectrum,
@@ -74,6 +74,7 @@ def roughness_curve(
     transpose_domain: TransposeDomain = de.default_transpose_domain,
     function_type: str = de.default_roughness_function_type,
     normalize: bool = False,
+    plot: bool = False,
     options = {
         'crossterms_only': False,
         'amp_type': 'MIN',
@@ -92,6 +93,12 @@ def roughness_curve(
 
     # ref_chord = cu.make_chord(ref_chord_struct, chord_struct_type, timbre=ref_timbre, fund_hz=fund_hz)
     # new_test_timbre = test_timbre.copy()
+
+    if (ref_chord == test_chord):
+        copy_tim = Timbre(ref_chord.partials['hz_orig'], ref_chord.partials['amp'])
+        test_chord = ChordSpectrum([0], 'ST_DIFF', timbre=copy_tim, fund_hz=1)
+        min_hz = np.min(test_chord.partials['hz_orig'])
+        test_chord.partials['fund_multiple'] /= min_hz
 
     roughness_vals = np.zeros(np.shape(transpose_domain.domain))
 
@@ -135,5 +142,9 @@ def roughness_curve(
     if normalize:
         plotMax = max(roughness_vals)
         roughness_vals /= float(plotMax)
+
+    if plot:
+        plt.plot(transpose_domain.domain, roughness_vals)
+        plt.show()
 
     return roughness_vals
