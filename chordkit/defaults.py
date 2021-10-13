@@ -74,7 +74,7 @@ class SetharesMajTriad(ChordSpectrum):
     def __init__(self, partials=12, fund=default_fund):
         ChordSpectrum.__init__(self, [0, 4, 7], 'ST_DIFF', timbre=SetharesTimbre(partials), fund_hz=fund)
 
-default_chord = SetharesTone(12)
+default_chord = SetharesTone(1)
 
 #####################
 # RELATION DEFAULTS #
