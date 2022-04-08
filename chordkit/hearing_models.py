@@ -18,3 +18,7 @@ def cbw_volk(hz):
 def cbw_zwicker(hz):
     khz = hz / 1000
     return 25 + 75 * (1 + 1.4 * khz ** 2) ** 0.69
+
+# Critical bandwidth, per Hutchinson and Knopoff 1978, 5
+def cbw_hutchinson(hz):
+    return 1.72 * (hz ** 0.65)

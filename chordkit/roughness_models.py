@@ -1,7 +1,7 @@
 import numpy as np
-from chordkit.hearing_models import cbw_volk as cbw, bark_zwicker as bark
-from chordkit.pair_constants import SETHARES_CONSTANTS as sc, AUDITORY_CONSTANTS as ac, pair_volume, pair_distance
-from chordkit.chord_utils import MergedSpectrum
+from hearing_models import cbw_volk, cbw_hutchinson
+from pair_constants import SETHARES_CONSTANTS as sc, AUDITORY_CONSTANTS as ac, pair_volume, pair_distance
+from chord_utils import MergedSpectrum
 
 # This file contains both the individual pairwise models used for assessing the
 # roughness of partial pairs and the summing function that adds up all such
@@ -71,7 +71,7 @@ def sethares_roughness_pair(x_hz, ref_hz, v_x, v_ref, *, options = {
     # for larger intervals.)
     # Sethares' original does not use this cutoff.
     if options['cutoff'] == True:
-        cbw_limit = 1.2 * cbw(max[x_hz, ref_hz]) / 2
+        cbw_limit = 1.2 * cbw_volk(max[x_hz, ref_hz]) / 2
         if distance < ac['slow_beat_limit'] or distance >= cbw_limit:
             v12 = 0
 
@@ -84,7 +84,7 @@ def sethares_roughness_pair(x_hz, ref_hz, v_x, v_ref, *, options = {
 # Returns roughness contribution of two partials, based on an indicator
 # function on the critical bandwidth, scaled to the amplitude of the partial.
 def cbw_roughness_pair(x_hz, ref_hz, v_x, v_ref, options={ 'amp_type': 'MIN' }):
-    cbw_limit = cbw(max([x_hz, ref_hz])) / 2
+    cbw_limit = cbw_volk(max([x_hz, ref_hz])) / 2
     distance = pair_distance(x_hz, ref_hz)
 
     if distance >= 15 and distance < cbw_limit:
@@ -98,9 +98,10 @@ def parncutt_roughness_pair(x_hz, ref_hz, v_x, v_ref, options = {}):
     a = 0.25
     i_factor = 2
 
-    x_bark = bark(x_hz)
-    ref_bark = bark(ref_hz)
-    distance = abs(x_bark - ref_bark)
+    freq_difference = abs(x_hz - ref_hz)
+    freq_median = (x_hz + ref_hz) / 2
+    freq_median_cbw = cbw_hutchinson(freq_median)
+    distance = freq_difference / freq_median_cbw
 
     if distance < 1.2:
         return ((np.exp(1)/a) * distance * np.exp(-distance / a)) ** i_factor

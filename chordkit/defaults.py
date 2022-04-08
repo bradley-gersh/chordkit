@@ -1,4 +1,4 @@
-from chordkit.chord_utils import Timbre, ChordSpectrum, TransposeDomain
+from chord_utils import Timbre, ChordSpectrum, TransposeDomain
 
 ###########
 # TIMBRES #
@@ -7,6 +7,11 @@ from chordkit.chord_utils import Timbre, ChordSpectrum, TransposeDomain
 class SetharesTimbre(Timbre):
     def __init__(self, partials=7):
         Timbre.__init__(self, range(1, partials + 1), [0.88 ** p for p in range(0, partials)])
+
+# With 11 partials and 1/n roll-off, as used in P. Harrison and Pearce 2020.
+class HarrisonTimbre(Timbre):
+    def __init__(self, partials=11, rolloff=1):
+        Timbre.__init__(self, range(1, partials + 1), [1/(p ** rolloff) for p in range(1, partials + 1)])
 
 class SineTimbre(Timbre):
     def __init__(self):
@@ -30,6 +35,7 @@ class DefaultTimbre(SetharesTimbre):
 ###############
 a4 = 440.0
 a3 = 220.0
+c3 = 130.8127826502993
 c4 = 261.6255653005986
 d4 = 293.6647679174076
 
@@ -62,6 +68,10 @@ class SetharesTone(ChordSpectrum):
     def __init__(self, partials=7, fund=default_fund):
         ChordSpectrum.__init__(self, [0], 'ST_DIFF', timbre=SetharesTimbre(partials), fund_hz=fund)
 
+class HarrisonTone(ChordSpectrum):
+    def __init__(self, partials=11, fund=default_fund):
+        ChordSpectrum.__init__(self, [0], 'ST_DIFF', timbre=HarrisonTimbre(partials, rolloff=1), fund_hz=fund)
+
 class FlatSawTone(ChordSpectrum):
     def __init__(self, partials=12, fund=default_fund):
         ChordSpectrum.__init__(self, [0], 'ST_DIFF', timbre=FlatSawTimbre(partials), fund_hz=fund)
@@ -73,6 +83,10 @@ class FilteredSawTone(ChordSpectrum):
 class SetharesMajTriad(ChordSpectrum):
     def __init__(self, partials=12, fund=default_fund):
         ChordSpectrum.__init__(self, [0, 4, 7], 'ST_DIFF', timbre=SetharesTimbre(partials), fund_hz=fund)
+
+class HarrisonMajTriad(ChordSpectrum):
+    def __init__(self, partials=12, fund=default_fund):
+        ChordSpectrum.__init__(self, [0, 4, 7], 'ST_DIFF', timbre=HarrisonTimbre(partials), fund_hz=fund)
 
 default_chord = SetharesTone(1)
 

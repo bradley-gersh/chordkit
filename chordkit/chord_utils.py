@@ -39,7 +39,8 @@ class MergedSpectrum:
             self.fund_hz = 0
             # Two spectra provided: merge them
             if len(args) > 1 and isinstance(args[1].partials, pd.DataFrame):
-                self.partials = args[0].partials.append(args[1].partials, ignore_index = True)
+                # self.partials = args[0].partials.append(args[1].partials, ignore_index = True)
+                self.partials = pd.concat([args[0].partials, args[1].partials], ignore_index = True)
                 self.partials = sort_partials(self.partials)
             # Only one spectrum provided: copy it over
             else:
@@ -75,7 +76,8 @@ class ChordSpectrum:
             new_tone.partials['hz'] = self.add_note_hz(note)
             new_tone.partials['hz_orig'] = new_tone.partials['hz']
             new_tone.partials['note_id'] = idx
-            self.partials = self.partials.append(new_tone.partials, ignore_index = True)
+            # self.partials = self.partials.append(new_tone.partials, ignore_index = True)
+            self.partials = pd.concat([self.partials, new_tone.partials], ignore_index = True)
 
         self.partials = sort_partials(self.partials)
 

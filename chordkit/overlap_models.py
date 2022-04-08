@@ -1,7 +1,7 @@
 import numpy as np
-from chordkit.hearing_models import cbw_volk as cbw, bark_zwicker as bar
-from chordkit.pair_constants import SETHARES_CONSTANTS as sc, AUDITORY_CONSTANTS as ac, pair_volume, pair_distance
-from chordkit.chord_utils import MergedSpectrum
+from hearing_models import cbw_volk, cbw_hutchinson
+from pair_constants import SETHARES_CONSTANTS as sc, AUDITORY_CONSTANTS as ac, pair_volume, pair_distance
+from chord_utils import MergedSpectrum
 
 # Returns overlap contribution of two partials, based on an indicator
 # function on the overlap zone, scaled to the amplitude of the partial.
@@ -28,7 +28,7 @@ def cos_overlap_pair(x_hz, ref_hz, v_x, v_ref, options={
 
 # An imitation of the Sethares (1993) roughness function, but for overlap,
 # using a bell-like function
-def bell_overlap_pair(x_hz, ref_hz, v_x, v_ref, options={
+def sethares_bell_overlap_pair(x_hz, ref_hz, v_x, v_ref, options={
     'amp_type': 'MIN',
     'K': -2.374,
     'cutoff': False
@@ -49,7 +49,7 @@ def bell_overlap_pair(x_hz, ref_hz, v_x, v_ref, options={
     # function at 1.2 CBW, which prevents too-remote partials from
     # contributing to the final score.
     if options['cutoff'] == True:
-        cbw_limit = 1.2 * cbw(max[x_hz, ref_hz]) / 2
+        cbw_limit = 1.2 * cbw_volk(max[x_hz, ref_hz]) / 2
         if distance < ac['slow_beat_limit'] or distance >= cbw_limit:
             v12 = 0
 
@@ -57,6 +57,23 @@ def bell_overlap_pair(x_hz, ref_hz, v_x, v_ref, options={
         return v12 * np.exp(K * sc['b'] * s * distance)
     except OverflowError:
         print(f'Overflow in computing overlap: b == {sc["b"]}, s == {s}, distance == {distance}')
+
+# An imitation of the Bigand, Parncutt, and Lerdahl (1996) roughness function,
+# but for overlap, using a bell-like function
+def parncutt_bell_overlap_pair(x_hz, ref_hz, v_x, v_ref, options={}):
+    # Parameters asserted in BPL 1996 paper
+    a = 0.25
+    i_factor = 2
+    
+    freq_difference = abs(x_hz - ref_hz)
+    freq_median = (x_hz + ref_hz) / 2
+    freq_median_cbw = cbw_hutchinson(freq_median)
+    distance = freq_difference / freq_median_cbw
+    
+    if distance < 1.2:
+        return np.exp(- (distance ** i_factor)/(a / 2.0))
+    else:
+        return 0
 
 ###################
 # SUMMATION MODEL #
@@ -66,7 +83,7 @@ def bell_overlap_pair(x_hz, ref_hz, v_x, v_ref, options={
 # pairwise overlap functions.
 def overlap_complex(
     spectrum: MergedSpectrum,
-    function_type: str = 'BELL',
+    function_type: str = 'SETHARES_BELL',
     overlap_limit: float = 0.1,
     *,
     options={
@@ -80,8 +97,10 @@ def overlap_complex(
     overlap_partials = []
     overlap_vals = np.zeros((n, n))
 
-    if function_type.upper() == 'BELL':
-        pair_assess = bell_overlap_pair
+    if function_type.upper() == 'SETHARES_BELL':
+        pair_assess = sethares_bell_overlap_pair
+    elif function_type.upper() == 'PARNCUTT_BELL':
+        pair_assess = parncutt_bell_overlap_pair
     elif function_type.upper() == 'CBW':
         pair_assess = cbw_overlap_pair
     elif function_type.upper() == 'COS':

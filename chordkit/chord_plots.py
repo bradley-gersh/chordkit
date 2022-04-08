@@ -1,9 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import chordkit.defaults as de
-from chordkit.roughness_models import roughness_complex
-from chordkit.overlap_models import overlap_complex
-from chordkit.chord_utils import MergedSpectrum, ChordSpectrum, TransposeDomain, Timbre
+import defaults as de
+from roughness_models import roughness_complex
+from overlap_models import overlap_complex
+from chord_utils import MergedSpectrum, ChordSpectrum, TransposeDomain, Timbre
 
 def overlap_curve(
     ref_chord: ChordSpectrum,
