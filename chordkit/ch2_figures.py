@@ -1166,7 +1166,6 @@ def ch2_fig5a_15a(action):
     plt.plot(section_axis, fratres_sections_end['sethares_roughness'], 'k', linewidth=1)
     plt.plot(section_axis, fratres_sections_end['parncutt_roughness'], 'k', linewidth=3)
     plt.legend(['S model', 'HKP model'],edgecolor='k',prop={'size': 8.5})
-    plt.plot(['drone'] + list(range(1,10)), fratres_outer_diss_n, 'k')
     plt.xlabel('section')
     plt.ylabel('roughness (arbitrary units)')
     plt.ylim(ymin=0.0)
