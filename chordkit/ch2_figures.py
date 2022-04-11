@@ -4,12 +4,17 @@ from matplotlib import pyplot as plt
 import sys
 
 from chord_utils import MergedSpectrum, ChordSpectrum, TransposeDomain
-from defaults import (SineTone, SetharesTone, HarrisonTone, FlatSawTone, SetharesMajTriad, HarrisonMajTriad, FlatSawTimbre, HarrisonTimbre, SetharesTimbre, c3, c4, d4, midi_zero, a3, a4, one_octave, two_octaves, two_octaves_symm)
+from defaults import (SineTone, SetharesTone, HarrisonTone, FlatSawTone,
+    SetharesMajTriad, HarrisonMajTriad, FlatSawTimbre, HarrisonTimbre,
+    SetharesTimbre, c3, c4, d4, midi_zero, a3, a4, one_octave, two_octaves,
+    two_octaves_symm)
 from chord_plots import overlap_curve, roughness_curve
 from roughness_models import roughness_complex
 from overlap_models import overlap_complex
 from pair_constants import AUDITORY_CONSTANTS as ac
-from chord_lists import fratres_8vedrone_nocb8ves, fratres_8vedrone_cb8va, fratres_no8ves
+from chord_lists import (fratres_8vedrone_nocb8ves, fratres_8vedrone_cb8va,
+    fratres_no8ves, fratres_phrase_end_sonorities, fratres_phrase_start_sonorities,
+    fratres_tenths_only)
 
 # Dissertation ch. 2, figure 1
 # Figure 1a. A plot of Helmholtz’s pair-roughness function (Helmholtz 1895, appendix XV)
@@ -1060,91 +1065,139 @@ def ch2_fig1b_appendix(action):
     else:
         plt.show()
 
-# Figure 3. HKP and Sethares roughness for Fratres chords
-# Figure 13 (also). Sethares roughness and relative roughness for Fratres chords
+# Figure 5. HKP and Sethares roughness for Fratres chords
+# Figure 15 (also). Sethares roughness and relative roughness for Fratres chords
 # These are versions of the graphs that include all chords, not only the posts.
-def ch2_fig3b_13b(action):
-    title1 = 'ch2_fig3b'
-    title2 = 'ch2_fig13b'
-
+def ch2_fig5a_15a(action):
+    title1 = 'ch2_fig5a'
+    title2 = 'ch2_fig5b'
+    title3 = 'ch2_fig5c'
+    title4 = 'ch2_fig5d'
+    title2 = 'ch2_fig15a'
+    
     tim = HarrisonTimbre(12)
     fund = midi_zero
-
+    
+    # A helpful function to normalize so the first value is 1
+    def first_value_one(lst):
+        return lst / lst[0]
+    
+    # Helper function perform the various manipulations for each curve
+    def get_curves(lst):
+        fratres = [ChordSpectrum(chord, 'ST_DIFF', timbre=tim, fund_hz=fund) for chord in lst]
+        sethares_roughness = np.array([roughness_complex(chord, 'SETHARES') for chord in fratres])
+        sethares_overlap = np.array([overlap_complex(chord, 'SETHARES_BELL') for chord in fratres])
+        parncutt_roughness = np.array([roughness_complex(chord, 'PARNCUTT') for chord in fratres])
+        parncutt_overlap = np.array([overlap_complex(chord, 'PARNCUTT_BELL') for chord in fratres])
+        
+        sethares_ratio = sethares_roughness / sethares_overlap
+        parncutt_ratio = parncutt_roughness / parncutt_overlap
+        
+        sethares_roughness_n = first_value_one(sethares_roughness)
+        parncutt_roughness_n = first_value_one(parncutt_roughness)
+        sethares_ratio_n = first_value_one(sethares_ratio)
+        parncutt_ratio_n = first_value_one(parncutt_ratio)
+        
+        return {
+            'sethares_roughness': sethares_roughness_n,
+            'parncutt_roughness': parncutt_roughness_n,
+            'sethares_ratio': sethares_ratio_n,
+            'parncutt_ratio': parncutt_ratio_n
+        }
+    
     # The lower octave is not doubled, following the holograph score shown at
     # on the Arvo Pärt Centre website, https://www.arvopart.ee/en/arvo-part/work/390/
-    # fratres_drone = ChordSpectrum([45, 52], 'ST_DIFF', timbre=tim, fund_hz=fund)
-
-    # fratres_tenths = [ChordSpectrum(chord, 'ST_DIFF', timbre=tim, fund_hz=fund) for chord in [
-        # [],
-        # data temporarily redacted
-    # ]]
     
+    fratres_all = get_curves(fratres_8vedrone_cb8va)
+    fratres_no_cb = get_curves(fratres_8vedrone_nocb8ves)
+    fratres_sections_start = get_curves(fratres_phrase_start_sonorities)
+    fratres_sections_end = get_curves(fratres_phrase_end_sonorities)
+    fratres_tenths = get_curves(fratres_tenths_only)
     
-                        
-    # fratres = fratres_no8ves
-    fratres = fratres_8vedrone_nocb8ves
- 
-    fratres_chords = [ChordSpectrum(chord, 'ST_DIFF', timbre=tim, fund_hz=fund) for chord in fratres]
-
-    # fratres_upper_var_1 = [ChordSpectrum(chord, 'ST_DIFF', timbre=tim, fund_hz=fund) for chord in [
-        # [],
-        # data temporarily redacted
-    # ]]
-
-    # The next one includes the other variable sonorities
-    # fratres_upper_var_2 = [ChordSpectrum(chord, 'ST_DIFF', timbre=tim, fund_hz=fund) for chord in [
-        # [],
-        # data temporarily redacted
-    # ]]
+    section_axis = ['drone'] + list(range(1,10))
     
-    fratres_sethares_outer_diss = np.array([
-        roughness_complex(chord, 'SETHARES') for chord in fratres_chords
-    ])
-    
-    fratres_sethares_outer_overlap = np.array([
-        overlap_complex(chord, 'SETHARES_BELL') for chord in fratres_chords
-    ])
-    
-    fratres_parncutt_outer_diss = np.array([
-        roughness_complex(chord, 'PARNCUTT') for chord in fratres_chords
-    ])
-    
-    fratres_parncutt_outer_overlap = np.array([
-        overlap_complex(chord, 'PARNCUTT_BELL') for chord in fratres_chords
-    ])
-    
-    fratres_sethares_outer_ratio = fratres_sethares_outer_diss / fratres_sethares_outer_overlap
-    fratres_sethares_outer_ratio = fratres_sethares_outer_diss / fratres_sethares_outer_overlap
-    fratres_parncutt_outer_ratio = fratres_parncutt_outer_diss / fratres_parncutt_outer_overlap
-    
-    # Normalize so drone has roughness 1
-    fratres_sethares_outer_diss_n = fratres_sethares_outer_diss / fratres_sethares_outer_diss[0]
-    fratres_sethares_outer_ratio_n = fratres_sethares_outer_ratio / fratres_sethares_outer_ratio[0]
-    fratres_parncutt_outer_diss_n = fratres_parncutt_outer_diss / fratres_parncutt_outer_diss[0]
-    fratres_parncutt_outer_ratio_n = fratres_parncutt_outer_ratio / fratres_parncutt_outer_ratio[0]
-
     # Plots
-
-    # Fig 3
-    plt.figure(3)
+    
+    # Fig 5a
+    plt.figure('5a')
     fig, ax = plt.subplots()
     fig.set_figwidth(10)
-    l = len(fratres_sethares_outer_diss_n)
-    plt.plot(np.arange(l), fratres_sethares_outer_diss_n, 'k', linewidth=1)
-    plt.plot(np.arange(l), fratres_parncutt_outer_diss_n, 'k', linewidth=3)
+    l = len(fratres_all['sethares_roughness'])
+    plt.plot(np.arange(l), fratres_all['sethares_roughness'], 'k', linewidth=1)
+    plt.plot(np.arange(l), fratres_all['parncutt_roughness'], 'k', linewidth=3)
     plt.legend(['S model', 'HKP model'],edgecolor='k',prop={'size': 8.5})
+    plt.xlabel('quarter-note beats from start')
+    plt.ylabel('roughness (arbitrary units)')
+    plt.ylim(ymin=0.0)
+    ax.yaxis.set_label_coords(-0.06, 0.5)
+    
+    if action.lower() == 'save':
+        plt.savefig(title1 + '.png', dpi=350)
+        print(title1 + '.png saved')
+    else:
+        plt.show(block=True)
+    
+    # Fig 5b
+    plt.figure('5b')
+    fig, ax = plt.subplots()
+    fig.set_figwidth(10)
+    l = len(fratres_no_cb['sethares_roughness'])
+    plt.plot(np.arange(l), fratres_no_cb['sethares_roughness'], 'k', linewidth=1)
+    plt.plot(np.arange(l), fratres_no_cb['parncutt_roughness'], 'k', linewidth=3)
+    plt.legend(['S model', 'HKP model'],edgecolor='k',prop={'size': 8.5})
+    plt.xlabel('quarter-note beats from start')
+    plt.ylabel('roughness (arbitrary units)')
+    plt.ylim(ymin=0.0)
+    ax.yaxis.set_label_coords(-0.06, 0.5)
+    
+    if action.lower() == 'save':
+        plt.savefig(title2 + '.png', dpi=350)
+        print(title2 + '.png saved')
+    else:
+        plt.show(block=True)
+    
+    # Fig 5c
+    plt.figure('5c')
+    fig, ax = plt.subplots()
+    fig.set_figwidth(10)
+    l = len(fratres_sections_start)
+    plt.plot(section_axis, fratres_sections_start['sethares_roughness'], 'k', linewidth=1)
+    plt.plot(section_axis, fratres_sections_start['parncutt_roughness'], 'k', linewidth=3)
+    plt.plot(section_axis, fratres_sections_end['sethares_roughness'], 'k', linewidth=1)
+    plt.plot(section_axis, fratres_sections_end['parncutt_roughness'], 'k', linewidth=3)
+    plt.legend(['S model', 'HKP model'],edgecolor='k',prop={'size': 8.5})
+    plt.plot(['drone'] + list(range(1,10)), fratres_outer_diss_n, 'k')
     plt.xlabel('section')
     plt.ylabel('roughness (arbitrary units)')
     plt.ylim(ymin=0.0)
     ax.yaxis.set_label_coords(-0.06, 0.5)
-
+    
     if action.lower() == 'save':
-        plt.savefig(title1 + '.png', dpi=350)
-        print(title1 + '.png saved')
-
+        plt.savefig(title3 + '.png', dpi=350)
+        print(title3 + '.png saved')
     else:
         plt.show(block=True)
-
+    
+    # Fig 5d
+    plt.figure('5d')
+    fig, ax = plt.subplots()
+    fig.set_figwidth(10)
+    l = len(fratres_tenths)
+    plt.plot(section_axis, fratres_tenths['sethares_roughness'], 'k', linewidth=1)
+    plt.plot(section_axis, fratres_tenths['parncutt_roughness'], 'k', linewidth=3)
+    plt.legend(['S model', 'HKP model'],edgecolor='k',prop={'size': 8.5})
+    plt.xlabel('quarter-note beats from start')
+    plt.ylabel('roughness (arbitrary units)')
+    plt.ylim(ymin=0.0)
+    ax.yaxis.set_label_coords(-0.06, 0.5)
+    
+    if action.lower() == 'save':
+        plt.savefig(title4 + '.png', dpi=350)
+        print(title4 + '.png saved')
+    else:
+        plt.show(block=True)
+    
+    
     # Fig 13
     # plt.figure(13)
     # fig, ax = plt.subplots()
@@ -1156,11 +1209,11 @@ def ch2_fig3b_13b(action):
     # plt.ylabel('roughness (arbitrary units)')
     # plt.ylim(ymin=0.0)
     # ax.yaxis.set_label_coords(-0.06, 0.5)
-
+    
     # if action.lower() == 'save':
     #     plt.savefig(title2 + '.png', dpi=350)
     #     print(title2 + '.png saved')
-
+    
     # else:
     #     plt.show(block=False)
 
@@ -1173,8 +1226,8 @@ def __main__(argv):
     # ch2_fig1a(action)
     # ch2_fig2a(action)
     # ch2_fig2b(action)
-    # ch2_fig3_13(action)
-    ch2_fig3b_13b(action)
+    # ch2_fig5_15(action)
+    ch2_fig5a_15a(action)
     # ch2_fig4(action)
     # ch2_fig5(action)
     # ch2_fig6(action)
