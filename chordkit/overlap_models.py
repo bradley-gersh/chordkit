@@ -65,13 +65,20 @@ def parncutt_bell_overlap_pair(x_hz, ref_hz, v_x, v_ref, options={}):
     a = 0.25
     i_factor = 2
     
+    # Factor chosen so slope of overlap curve intersects roughness curve
+    # at y = 0.5.
+    K = 1.19614
+    
     freq_difference = abs(x_hz - ref_hz)
     freq_median = (x_hz + ref_hz) / 2
     freq_median_cbw = cbw_hutchinson(freq_median)
     distance = freq_difference / freq_median_cbw
     
+    # Volume scaling (cf. Hutchinson and Knopoff 1978, 3)
+    amp = v_x * v_ref / (v_x * v_x + v_ref * v_ref)
+    
     if distance < 1.2:
-        return np.exp(- (distance ** i_factor)/(a / 2.0))
+        return amp * (np.exp(- (distance ** i_factor)/(a ** 3 / K)))
     else:
         return 0
 

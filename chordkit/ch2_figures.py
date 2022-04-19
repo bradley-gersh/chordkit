@@ -14,12 +14,29 @@ from overlap_models import overlap_complex
 from pair_constants import AUDITORY_CONSTANTS as ac
 from chord_lists import (fratres_8vedrone_nocb8ves, fratres_8vedrone_cb8va,
     fratres_no8ves, fratres_phrase_end_sonorities, fratres_phrase_start_sonorities,
-    fratres_tenths_only)
+    fratres_tenths_only, fratres_tenths_only_thindrone)
 
-# Dissertation ch. 2, figure 1
-# Figure 1a. A plot of Helmholtz’s pair-roughness function (Helmholtz 1895, appendix XV)
-def ch2_fig1a(action):
-    title = 'ch2_fig1a'
+
+figure_idx = {
+    'helmholtz_pair': '1a',
+    'timbre_plots': '2',
+    'pair_roughness': '3a'
+}
+
+def save_show(name, action):
+    if action.lower() == 'save':
+        title = f'ch2_fig{figure_idx[name]}.png'
+        plt.savefig(title, dpi=350)
+        print(f'{title} saved')
+    
+    else:
+        plt.show()
+    
+    plt.close()
+
+# A plot of Helmholtz’s pair-roughness function (Helmholtz 1895, appendix XV)
+def helmholtz_pair(action):
+    name = 'helmholtz_pair'
 
     ref_tone = SineTone(a4)
     test_tone = SineTone(a4)
@@ -50,16 +67,47 @@ def ch2_fig1a(action):
     plt.subplots_adjust(left=0.15)
     ax.yaxis.set_label_coords(-0.13, 0.5)
 
-    if action.lower() == 'save':
-        plt.savefig(f'{title}.png',dpi=350)
-        print(f'{title}.png saved')
+    save_show(name, action)
 
-    else:
-        plt.show()
+# Plots of individual timbres
+def timbre_plots(action):
+    name = 'timbre_plots'
+    
+    h_tim = HarrisonTimbre(11)
+    s_tim = SetharesTimbre(11)
+    fund = 1
 
-# Figure 2a. Sethares + Parncutt pair roughness function (Sethares 1993, BPL 1996)
-def ch2_fig2a(action):
-    title = 'ch2_fig2a'
+    h = ChordSpectrum([0], 'ST_DIFF', timbre=h_tim, fund_hz=fund)
+    s = ChordSpectrum([0], 'ST_DIFF', timbre=s_tim, fund_hz=fund)
+
+    f0 = r'$\mathsf{f_0}$'
+    freqs = [f0] + [str(x) + f0 for x in range(2, 12)]
+    
+    # Plot
+    fig, ax = plt.subplots(1, 2, figsize=(12, 4))
+    plt.subplots_adjust(wspace=0.3, hspace=0.7)
+    for panel in ax:
+        panel.spines['right'].set_visible(False)
+        panel.spines['top'].set_visible(False)
+        panel.set_ylim([0, 1.1])
+        panel.set_xlim([-1, 12.])
+        panel.set_ylabel('amplitude\n(arbitrary units)')
+        panel.set_xlabel('frequency (Hz)')
+
+    ax[0].stem(freqs, h.partials['amp'], linefmt='k', markerfmt='ko', basefmt=' ')
+    ax[0].set_title('H(11)')
+    ax[1].stem(freqs, s.partials['amp'], linefmt='k', markerfmt='ko', basefmt=' ')
+    ax[1].set_title(r'E$_{\mathsf{0.88}}$(11)', usetex=True)
+    
+    fig.add_artist(plt.Text(0.05, 0.8, '(a)', size=16.0, weight='bold'))
+    fig.add_artist(plt.Text(0.5, 0.8, '(b)', size=16.0, weight='bold'))
+
+    save_show(name, action)
+
+
+# Sethares + Parncutt pair roughness function (Sethares 1993, BPL 1996)
+def pair_roughness(action):
+    name = 'pair_roughness'
 
     ref_tone = SineTone(a4)
     test_tone = SineTone(a4)
@@ -108,12 +156,7 @@ def ch2_fig2a(action):
     plt.subplots_adjust(left=0.15)
     ax.yaxis.set_label_coords(-0.13, 0.5)
 
-    if action.lower() == 'save':
-        plt.savefig(f'{title}.png', dpi=350)
-        print(f'{title}.png saved')
-
-    else:
-        plt.show()
+    save_show(name, action)
 
 # Figure 2b. Sethares + Parncutt complex roughness function
 def ch2_fig2b(action):
@@ -121,10 +164,10 @@ def ch2_fig2b(action):
 
     # Would make sense to use `sethares_timbre` here, but it has too few partials (7)
     # for the overlap function later.
-    # ref_tone = HarrisonTone(12, c3)
-    # test_tone = HarrisonTone(12, c3)
-    ref_tone = HarrisonTone(12, a4)
-    test_tone = HarrisonTone(12, a4)
+    # ref_tone = HarrisonTone(11, c3)
+    # test_tone = HarrisonTone(11, c3)
+    ref_tone = HarrisonTone(11, a4)
+    test_tone = HarrisonTone(11, a4)
     T = one_octave
 
     sethares_roughness = roughness_curve(
@@ -150,11 +193,10 @@ def ch2_fig2b(action):
         function_type='PARNCUTT',
         normalize=True,
         options={
-            'amp_type': 'MIN',
             'crossterms_only': False,
             'cutoff': False,
             'normalize': True,
-            'original': False,
+            'original': True,
             'show_partials': False
         }
     )
@@ -179,108 +221,293 @@ def ch2_fig2b(action):
     else:
         plt.show()
 
-# Figure 3. Sethares roughness for Fratres chords
-# Figure 13 (also). Sethares roughness and relative roughness for Fratres chords
-def ch2_fig3_13(action):
-    title1 = 'ch2_fig3'
-    title2 = 'ch2_fig13'
-
-    tim = HarrisonTimbre(12)
+# Fratre graphs
+# Figure 5. HKP and Sethares roughness for Fratres chords
+# Figure 13. HKP and Sethares relative roughness for Fratres chords
+def ch2_fig5_13(action):
+    title1 = 'ch2_fig5a'
+    title2 = 'ch2_fig5b'
+    title3 = 'ch2_fig5c'
+    title4 = 'ch2_fig5d'
+    title5 = 'ch2_fig5e'
+    title15a = 'ch2_fig15a'
+    title15b = 'ch2_fig15b'
+    title15c = 'ch2_fig15c'
+    title15d = 'ch2_fig15d'   
+    title15e = 'ch2_fig15e'   
+    
+    tim = HarrisonTimbre(11)
     fund = midi_zero
-
+    
+    # A helpful function to normalize so the first value is 1
+    def first_value_one(lst):
+        return lst / lst[0]
+    
+    # Helper function perform the various manipulations for each curve
+    def get_curves(lst):
+        fratres = [ChordSpectrum(chord, 'ST_DIFF', timbre=tim, fund_hz=fund) for chord in lst]
+        sethares_roughness = np.array([roughness_complex(chord, 'SETHARES') for chord in fratres])
+        sethares_overlap = np.array([overlap_complex(chord, 'SETHARES_BELL') for chord in fratres])
+        parncutt_roughness = np.array([roughness_complex(chord, 'PARNCUTT') for chord in fratres])
+        parncutt_overlap = np.array([overlap_complex(chord, 'PARNCUTT_BELL') for chord in fratres])
+        
+        sethares_ratio = sethares_roughness / sethares_overlap
+        parncutt_ratio = parncutt_roughness / parncutt_overlap
+        
+        sethares_roughness_n = first_value_one(sethares_roughness)
+        parncutt_roughness_n = first_value_one(parncutt_roughness)
+        sethares_ratio_n = first_value_one(sethares_ratio)
+        parncutt_ratio_n = first_value_one(parncutt_ratio)
+        
+        return {
+            'sethares_roughness': sethares_roughness_n,
+            'parncutt_roughness': parncutt_roughness_n,
+            'sethares_ratio': sethares_ratio_n,
+            'parncutt_ratio': parncutt_ratio_n
+        }
+    
     # The lower octave is not doubled, following the holograph score shown at
     # on the Arvo Pärt Centre website, https://www.arvopart.ee/en/arvo-part/work/390/
-    fratres_drone = ChordSpectrum([45, 52], 'ST_DIFF', timbre=tim, fund_hz=fund)
-
-    fratres_tenths = [ChordSpectrum(chord, 'ST_DIFF', timbre=tim, fund_hz=fund) for chord in [
-        [],
-        # data temporarily redacted
-    ]]
-
-    fratres_upper_var_1 = [ChordSpectrum(chord, 'ST_DIFF', timbre=tim, fund_hz=fund) for chord in [
-        [],
-        # data temporarily redacted
-    ]]
-
-    # The next one includes the other variable sonorities
-    fratres_upper_var_2 = [ChordSpectrum(chord, 'ST_DIFF', timbre=tim, fund_hz=fund) for chord in [
-        [],
-        # data temporarily redacted
-    ]]
-
-    fratres_outer_diss = np.array([
-        roughness_complex(MergedSpectrum(fratres_drone, chord), 'SETHARES') for chord in fratres_tenths
-    ])
-
-    fratres_outer_overlap = np.array([
-        overlap_complex(MergedSpectrum(fratres_drone, chord), 'SETHARES_BELL') for chord in fratres_tenths
-    ])
-
-    fratres_outer_ratio = fratres_outer_diss / fratres_outer_overlap
-
-    # Normalize so drone has roughness 1
-    fratres_outer_diss_n = fratres_outer_diss / fratres_outer_diss[0]
-    fratres_outer_ratio_n = fratres_outer_ratio / fratres_outer_ratio[0]
-
+    
+    fratres_all = get_curves(fratres_8vedrone_cb8va)
+    fratres_no_cb = get_curves(fratres_8vedrone_nocb8ves)
+    fratres_sections_start = get_curves(fratres_phrase_start_sonorities)
+    fratres_sections_end = get_curves(fratres_phrase_end_sonorities)
+    fratres_tenths = get_curves(fratres_tenths_only)
+    fratres_tenths_thindrone = get_curves(fratres_tenths_only_thindrone)
+    
+    section_axis = ['drone'] + list(range(1,10))
+    
     # Plots
-
-    # Fig 3
-    plt.figure(3)
+    
+    # Fig 5a
+    plt.figure('5a')
     fig, ax = plt.subplots()
     fig.set_figwidth(10)
-    plt.plot(['drone'] + list(range(1,10)), fratres_outer_diss_n, 'k')
+    l = len(fratres_all['sethares_roughness'])
+    plt.plot(np.arange(l), fratres_all['sethares_roughness'], 'k', linewidth=1)
+    plt.plot(np.arange(l), fratres_all['parncutt_roughness'], 'k', linewidth=3)
+    plt.legend(['S model', 'HKP model'],edgecolor='k',prop={'size': 8.5})
+    plt.xlabel('quarter-note beats from start')
+    plt.ylabel('roughness (arbitrary units)')
+    plt.ylim(ymin=0.0)
+    ax.yaxis.set_label_coords(-0.06, 0.5)
+    
+    if action.lower() == 'save':
+        plt.savefig(title1 + '.png', dpi=350)
+        print(title1 + '.png saved')
+    else:
+        plt.show(block=True)
+    
+    # Fig 5b
+    plt.figure('5b')
+    fig, ax = plt.subplots()
+    fig.set_figwidth(10)
+    l = len(fratres_no_cb['sethares_roughness'])
+    plt.plot(np.arange(l), fratres_no_cb['sethares_roughness'], 'k', linewidth=1)
+    plt.plot(np.arange(l), fratres_no_cb['parncutt_roughness'], 'k', linewidth=3)
+    plt.legend(['S model', 'HKP model'],edgecolor='k',prop={'size': 8.5})
+    plt.xlabel('quarter-note beats from start')
+    plt.ylabel('roughness (arbitrary units)')
+    plt.ylim(ymin=0.0)
+    ax.yaxis.set_label_coords(-0.06, 0.5)
+    
+    if action.lower() == 'save':
+        plt.savefig(title2 + '.png', dpi=350)
+        print(title2 + '.png saved')
+    else:
+        plt.show(block=True)
+    
+    # Fig 5c
+    plt.figure('5c')
+    fig, ax = plt.subplots()
+    fig.set_figwidth(10)
+    l = len(fratres_sections_start)
+    plt.plot(section_axis, fratres_sections_start['sethares_roughness'], 'k', linewidth=1)
+    plt.plot(section_axis, fratres_sections_start['parncutt_roughness'], 'k', linewidth=3)
+    plt.plot(section_axis, fratres_sections_end['sethares_roughness'], 'k', linewidth=1)
+    plt.plot(section_axis, fratres_sections_end['parncutt_roughness'], 'k', linewidth=3)
+    plt.legend(['S model', 'HKP model'],edgecolor='k',prop={'size': 8.5})
+    plt.xlabel('section')
+    plt.ylabel('roughness (arbitrary units)')
+    plt.ylim(ymin=0.0, ymax=3.4)
+    ax.yaxis.set_label_coords(-0.06, 0.5)
+    
+    if action.lower() == 'save':
+        plt.savefig(title3 + '.png', dpi=350)
+        print(title3 + '.png saved')
+    else:
+        plt.show(block=True)
+    
+    # Fig 5d
+    plt.figure('5d')
+    fig, ax = plt.subplots()
+    fig.set_figwidth(10)
+    l = len(fratres_tenths)
+    plt.plot(section_axis, fratres_tenths['sethares_roughness'], 'k', linewidth=1)
+    plt.plot(section_axis, fratres_tenths['parncutt_roughness'], 'k', linewidth=3)
+    plt.legend(['S model', 'HKP model'],edgecolor='k',prop={'size': 8.5})
+    plt.xlabel('section')
+    plt.ylabel('roughness (arbitrary units)')
+    plt.ylim(ymin=0.0, ymax=3.4)
+    ax.yaxis.set_label_coords(-0.06, 0.5)
+    
+    if action.lower() == 'save':
+        plt.savefig(title4 + '.png', dpi=350)
+        print(title4 + '.png saved')
+    else:
+        plt.show(block=True)
+    
+    # Fig 5e
+    plt.figure('5e')
+    fig, ax = plt.subplots()
+    fig.set_figwidth(10)
+    l = len(fratres_tenths)
+    plt.plot(section_axis, fratres_tenths_thindrone['sethares_roughness'], 'k', linewidth=1)
+    plt.plot(section_axis, fratres_tenths_thindrone['parncutt_roughness'], 'k', linewidth=3)
+    plt.legend(['S model', 'HKP model'],edgecolor='k',prop={'size': 8.5},loc="upper left")
     plt.xlabel('section')
     plt.ylabel('roughness (arbitrary units)')
     plt.ylim(ymin=0.0)
     ax.yaxis.set_label_coords(-0.06, 0.5)
-
+    
     if action.lower() == 'save':
-        plt.savefig(f'{title1}.png', dpi=350)
-        print(f'{title1}.png saved')
-
+        plt.savefig(title5 + '.png', dpi=350)
+        print(title5 + '.png saved')
     else:
-        plt.show(block=False)
-
-    # Fig 13
-    plt.figure(13)
+        plt.show(block=True)
+    
+    # Fig 15a
+    plt.figure('15a')
     fig, ax = plt.subplots()
     fig.set_figwidth(10)
-    plt.plot(['drone'] + list(range(1,10)), fratres_outer_ratio_n, 'k', linewidth=3)
-    plt.plot(['drone'] + list(range(1,10)), fratres_outer_diss_n, 'k--')
-    plt.legend(['relative roughness', 'roughness'], edgecolor='k')
-    plt.xlabel('section')
-    plt.ylabel('roughness (arbitrary units)')
+    l = len(fratres_all['sethares_ratio'])
+    plt.plot(np.arange(l), fratres_all['sethares_ratio'], 'k', linewidth=1)
+    plt.plot(np.arange(l), fratres_all['parncutt_ratio'], 'k', linewidth=3)
+    plt.legend(['S model', 'HKP model'],edgecolor='k',prop={'size': 8.5})
+    plt.xlabel('quarter-note beat')
+    plt.ylabel('roughness/overlap (arbitrary units)')
     plt.ylim(ymin=0.0)
     ax.yaxis.set_label_coords(-0.06, 0.5)
-
+    
     if action.lower() == 'save':
-        plt.savefig(f'{title2}.png', dpi=350)
-        print(f'{title2}.png saved')
-
+        plt.savefig(title15a + '.png', dpi=350)
+        print(title15a + '.png saved')
+    
     else:
         plt.show(block=False)
+    
+    # Fig 15b
+    plt.figure('15b')
+    fig, ax = plt.subplots()
+    fig.set_figwidth(10)
+    l = len(fratres_no_cb['sethares_roughness'])
+    plt.plot(np.arange(l), fratres_no_cb['sethares_ratio'], 'k', linewidth=1)
+    plt.plot(np.arange(l), fratres_no_cb['parncutt_ratio'], 'k', linewidth=3)
+    plt.legend(['S model', 'HKP model'],edgecolor='k',prop={'size': 8.5})
+    plt.xlabel('quarter-note beats from start')
+    plt.ylabel('roughness/overlap (arbitrary units)')
+    plt.ylim(ymin=0.0)
+    ax.yaxis.set_label_coords(-0.06, 0.5)
+    
+    if action.lower() == 'save':
+        plt.savefig(title15b + '.png', dpi=350)
+        print(title15b + '.png saved')
+    else:
+        plt.show(block=True)
+    
+    # Fig 15c
+    plt.figure('15c')
+    fig, ax = plt.subplots()
+    fig.set_figwidth(10)
+    l = len(fratres_sections_start)
+    plt.plot(section_axis, fratres_sections_start['sethares_ratio'], 'k', linewidth=1)
+    plt.plot(section_axis, fratres_sections_start['parncutt_ratio'], 'k', linewidth=3)
+    plt.plot(section_axis, fratres_sections_end['sethares_ratio'], 'k', linewidth=1)
+    plt.plot(section_axis, fratres_sections_end['parncutt_ratio'], 'k', linewidth=3)
+    plt.legend(['S model', 'HKP model'],edgecolor='k',prop={'size': 8.5})
+    plt.xlabel('section')
+    plt.ylabel('roughness/overlap (arbitrary units)')
+    plt.ylim(ymin=0.0, ymax=3.4)
+    ax.yaxis.set_label_coords(-0.06, 0.5)
+    
+    if action.lower() == 'save':
+        plt.savefig(title15c + '.png', dpi=350)
+        print(title15c + '.png saved')
+    else:
+        plt.show(block=True)
+    
+    # Fig 15d
+    plt.figure('15d')
+    fig, ax = plt.subplots()
+    fig.set_figwidth(10)
+    l = len(fratres_tenths)
+    plt.plot(section_axis, fratres_tenths['sethares_ratio'], 'k', linewidth=1)
+    plt.plot(section_axis, fratres_tenths['parncutt_ratio'], 'k', linewidth=3)
+    plt.legend(['S model', 'HKP model'],edgecolor='k',prop={'size': 8.5})
+    plt.xlabel('section')
+    plt.ylabel('roughness/overlap (arbitrary units)')
+    plt.ylim(ymin=0.0, ymax=3.4)
+    ax.yaxis.set_label_coords(-0.06, 0.5)
+    
+    if action.lower() == 'save':
+        plt.savefig(title15d + '.png', dpi=350)
+        print(title15d + '.png saved')
+    else:
+        plt.show(block=True)
+    
+    # Fig 15e
+    plt.figure('15e')
+    fig, ax = plt.subplots()
+    fig.set_figwidth(10)
+    l = len(fratres_tenths)
+    plt.plot(section_axis, fratres_tenths_thindrone['sethares_ratio'], 'k', linewidth=1)
+    plt.plot(section_axis, fratres_tenths_thindrone['parncutt_ratio'], 'k', linewidth=3)
+    plt.legend(['S model', 'HKP model'],edgecolor='k',prop={'size': 8.5},loc="upper left")
+    plt.xlabel('section')
+    plt.ylabel('roughness/overlap (arbitrary units)')
+    plt.ylim(ymin=0.0)
+    ax.yaxis.set_label_coords(-0.06, 0.5)
+    
+    if action.lower() == 'save':
+        plt.savefig(title15e + '.png', dpi=350)
+        print(title15e + '.png saved')
+    else:
+        plt.show(block=True)
 
-# Figure 4. Discrepancies between Sethares roughness and dissonance.
-def ch2_fig4(action):
-    title = 'ch2_fig4'
+# Figure 6. Discrepancies between HKP/S roughness and dissonance.
+def ch2_fig6(action):
+    title = 'ch2_fig6'
 
-    tim = HarrisonTimbre(12)
+    tim = HarrisonTimbre(11)
     fund = c4
 
+    c = ChordSpectrum([0], 'ST_DIFF', timbre=tim, fund_hz=fund)
+    e = ChordSpectrum([4], 'ST_DIFF', timbre=tim, fund_hz=fund)
+    g = ChordSpectrum([7], 'ST_DIFF', timbre=tim, fund_hz=fund)
+    b = ChordSpectrum([11], 'ST_DIFF', timbre=tim, fund_hz=fund)
     maj3_dyad = ChordSpectrum([0, 4], 'ST_DIFF', timbre=tim, fund_hz=fund)
     maj53_triad = ChordSpectrum([0, 4, 7], 'ST_DIFF', timbre=tim, fund_hz=fund)
     maj7_dyad = ChordSpectrum([0, 11], 'ST_DIFF', timbre=tim, fund_hz=fund)
 
-    data = {
+    sethares_data = {
         '[C4, E4]': roughness_complex(maj3_dyad, 'SETHARES'),
         '[C4, E4, G4]': roughness_complex(maj53_triad, 'SETHARES'),
         '[C4, B4]': roughness_complex(maj7_dyad, 'SETHARES')
     }
+    
+    parncutt_data = {
+        '[C4, E4]': roughness_complex(maj3_dyad, 'PARNCUTT'),
+        '[C4, E4, G4]': roughness_complex(maj53_triad, 'PARNCUTT'),
+        '[C4, B4]': roughness_complex(maj7_dyad, 'PARNCUTT')
+    }
 
     plot0_names = ['[C4, E4]', '[C4, E4, G4]']
     plot1_names = ['[C4, E4]', '[C4, B4]']
-    plot0_vals = [data[name] for name in plot0_names]
-    plot1_vals = [data[name] for name in plot1_names]
+    sethares_plot0_vals = [sethares_data[name] for name in plot0_names]
+    parncutt_plot0_vals = [parncutt_data[name] for name in plot0_names]
+    sethares_plot1_vals = [sethares_data[name] for name in plot1_names]
+    parncutt_plot1_vals = [parncutt_data[name] for name in plot1_names]
 
     # Plot
     fig, ax = plt.subplots(2, 3, figsize=(12,5), gridspec_kw={'width_ratios': [2, 2, 1]})
@@ -294,22 +521,46 @@ def ch2_fig4(action):
             panel.set_ylabel('amplitude\n(arbitrary units)')
             panel.set_xlabel('frequency (Hz)')
 
-    ax[0,0].stem(maj3_dyad.partials['hz'], maj3_dyad.partials['amp'], linefmt='k', markerfmt='ko', basefmt=' ')
+    xaxis = np.arange(2)
+    slide = 0.15
+    
+    ax[0,0].stem(c.partials['hz'], c.partials['amp'], linefmt='k', markerfmt='ko', basefmt=' ')
+    markerface1, _, _ = ax[0,0].stem(e.partials['hz'], e.partials['amp'], linefmt='k', markerfmt='ko', basefmt=' ')
+    markerface1.set_markerfacecolor('w')
+    ax[0,0].set_xlim([0, 5550])
     ax[0,0].set_title('[C4, E4]')
-    ax[0,1].stem(maj53_triad.partials['hz'], maj53_triad.partials['amp'], linefmt='k', markerfmt='ko', basefmt=' ')
+    
+    ax[0,1].stem(c.partials['hz'], c.partials['amp'], linefmt='k', markerfmt='ko', basefmt=' ')
+    markerface1, _, _ = ax[0,1].stem(e.partials['hz'], e.partials['amp'], linefmt='k', markerfmt='ko', basefmt=' ')
+    markerface1.set_markerfacecolor('w')
+    markerface2, _, _ = ax[0,1].stem(g.partials['hz'], e.partials['amp'], linefmt='k', markerfmt='kD', basefmt=' ')
+    markerface2.set_markerfacecolor('w')
+    ax[0,1].set_xlim([0, 5550])
     ax[0,1].set_title('[C4, E4, G4]')
-    ax[0,2].bar(plot0_names, plot0_vals, fill=False, hatch='///')
-    ax[0,2].set_ylim([0, data['[C4, E4, G4]'] * 1.1])
+
+    ax[0,2].bar(xaxis - slide, sethares_plot0_vals, width=0.3, fill=False, hatch='///', tick_label=plot0_names)
+    ax[0,2].bar(xaxis + slide, parncutt_plot0_vals, width=0.3, fill=True, color='k')
+    ax[0,2].legend(['S model', 'HKP model'], edgecolor='k', prop={'size': 8.5})
+    ax[0,2].set_ylim([0, max(parncutt_data['[C4, E4, G4]'], sethares_data['[C4, E4, G4]']) * 1.7])
     ax[0,2].spines['right'].set_visible(False)
     ax[0,2].spines['top'].set_visible(False)
     ax[0,2].set_ylabel('roughness\n(arbitrary units)')
 
-    ax[1,0].stem(maj3_dyad.partials['hz'], maj3_dyad.partials['amp'], linefmt='k', markerfmt='ko', basefmt=' ')
+    ax[1,0].stem(c.partials['hz'], c.partials['amp'], linefmt='k', markerfmt='ko', basefmt=' ')
+    markerface1, _, _ = ax[1,0].stem(e.partials['hz'], e.partials['amp'], linefmt='k', markerfmt='ko', basefmt=' ')
+    markerface1.set_markerfacecolor('w')
+    ax[1,0].set_xlim([0, 5550])
     ax[1,0].set_title('[C4, E4]')
-    ax[1,1].stem(maj7_dyad.partials['hz'], maj7_dyad.partials['amp'], linefmt='k', markerfmt='ko', basefmt=' ')
+    
+    ax[1,1].stem(c.partials['hz'], c.partials['amp'], linefmt='k', markerfmt='ko', basefmt=' ')
+    markerface1, _, _ = ax[1,1].stem(b.partials['hz'], e.partials['amp'], linefmt='k', markerfmt='ks', basefmt=' ')
+    ax[1,1].set_xlim([0, 5550])
     ax[1,1].set_title('[C4, B4]')
-    ax[1,2].bar(plot1_names, plot1_vals, fill=False, hatch='///')
-    ax[1,2].set_ylim([0, data['[C4, E4, G4]'] * 1.1])
+    
+    ax[1,2].bar(xaxis - slide, sethares_plot1_vals, width=0.3, fill=False, hatch='///', tick_label=plot1_names)
+    ax[1,2].bar(xaxis + slide, parncutt_plot1_vals, width=0.3, fill=True, color='k')
+    ax[1,2].legend(['S model', 'HKP model'], edgecolor='k', prop={'size': 8.5})
+    ax[1,2].set_ylim([0, max(parncutt_data['[C4, E4]'], sethares_data['[C4, E4]']) * 1.7])
     ax[1,2].spines['right'].set_visible(False)
     ax[1,2].spines['top'].set_visible(False)
     ax[1,2].set_ylabel('roughness\n(arbitrary units)')
@@ -325,24 +576,24 @@ def ch2_fig4(action):
     else:
         plt.show()
 
-# Figure 5. Octave drift and correction in Sethares roughness.
-def ch2_fig5(action): # Not working yet
-    title = 'ch2_fig5'
+# Figure 7. Octave drift and correction in S and HKP roughness.
+def ch2_fig7a(action):
+    title = 'ch2_fig7a'
 
-    ref_tone_short = HarrisonTone(7)
-    ref_tone_long = HarrisonTone(14)
-    test_tone = HarrisonTone(7)
+    ref_tone_short = HarrisonTone(11)
+    ref_tone_long = HarrisonTone(22)
+    test_tone = HarrisonTone(11)
     T = two_octaves
-    # T = TransposeDomain(-0.5, 24.5, 2401, 'ST_DIFF')
 
-    roughness_short = roughness_curve(ref_tone_short, test_tone, transpose_domain=T, function_type='SETHARES', normalize=True)
-    roughness_long = roughness_curve(ref_tone_long, test_tone, transpose_domain=T, function_type='SETHARES', normalize=True)
+    sethares_roughness_short = roughness_curve(ref_tone_short, test_tone, transpose_domain=T, function_type='SETHARES', normalize=True)
+    sethares_roughness_long = roughness_curve(ref_tone_long, test_tone, transpose_domain=T, function_type='SETHARES', normalize=True)
 
     # Plot
     fig, ax = plt.subplots()
     fig.set_figwidth(10)
-    plt.plot(T.domain, roughness_short, 'k')
-    plt.plot(T.domain, roughness_long, 'k--')
+    plt.plot(T.domain, sethares_roughness_long, 'k', linewidth=1)
+    plt.plot(T.domain, sethares_roughness_short, 'k--', linewidth=1)
+    plt.legend(['S model, different times', 'S model, same timbres'], edgecolor='k', prop={'size': 8.5})
     plt.xlabel('interval (semitones)')
     plt.ylabel('roughness (arbitrary units)')
     plt.ylim(ymin=0.0)
@@ -356,12 +607,42 @@ def ch2_fig5(action): # Not working yet
     else:
         plt.show()
 
-# Figure 6a. Pair-overlap curve.
-def ch2_fig6a(action):
-    title = 'ch2_fig6a'
+def ch2_fig7b(action):
+    title = 'ch2_fig7b'
 
-    ref_tone = SineTone(a3)
-    test_tone = SineTone(a3)
+    ref_tone_short = HarrisonTone(11)
+    ref_tone_long = HarrisonTone(22)
+    test_tone = HarrisonTone(11)
+    T = two_octaves
+
+    parncutt_roughness_short = roughness_curve(ref_tone_short, test_tone, transpose_domain=T, function_type='PARNCUTT', normalize=True)
+    parncutt_roughness_long = roughness_curve(ref_tone_long, test_tone, transpose_domain=T, function_type='PARNCUTT', normalize=True)
+
+    # Plot
+    fig, ax = plt.subplots()
+    fig.set_figwidth(10)
+    plt.plot(T.domain, parncutt_roughness_long, 'k', linewidth=2)
+    plt.plot(T.domain, parncutt_roughness_short, 'k--', linewidth=2)
+    plt.legend(['HKP model, different timbres', 'HKP model, same timbres'], edgecolor='k', prop={'size': 8.5})
+    plt.xlabel('interval (semitones)')
+    plt.ylabel('roughness (arbitrary units)')
+    plt.ylim(ymin=0.0)
+    ax.xaxis.set_major_locator(MultipleLocator(1))
+    ax.xaxis.set_major_formatter('{x:.0f}')
+    ax.yaxis.set_label_coords(-0.06, 0.5)
+
+    if action.lower() == 'save':
+        plt.savefig(f'{title}.png', dpi=350)
+        print(f'{title}.png saved')
+    else:
+        plt.show()
+
+# Figure 8a. Pair-overlap curve.
+def ch2_fig8a1(action):
+    title = 'ch2_fig8a1'
+
+    ref_tone = SineTone(a4)
+    test_tone = SineTone(a4)
     T = two_octaves_symm
 
     overlap = overlap_curve(
@@ -396,9 +677,64 @@ def ch2_fig6a(action):
 
     # Plot
     _, ax = plt.subplots()
-    ax.plot(T.domain, overlap, color='k', linestyle='-', linewidth=3)
+    ax.plot(T.domain, overlap, color='k', linestyle='-', linewidth=1)
     ax.plot(T.domain, roughness, color='k', linestyle='--', linewidth=1)
-    ax.legend(['overlap', 'roughness'], edgecolor='k')
+    ax.legend(['S overlap', 'S roughness'], edgecolor='k')
+    plt.xlabel('interval (semitones)')
+    plt.ylabel('(arbitrary units)')
+    ax.xaxis.set_major_locator(MultipleLocator(4))
+    ax.xaxis.set_major_formatter('{x:.0f}')
+    ax.xaxis.set_minor_locator(MultipleLocator(1))
+    plt.ylim(ymin=0.0)
+    plt.subplots_adjust(left=0.15)
+    ax.yaxis.set_label_coords(-0.13, 0.5)
+
+    if action.lower() == 'save':
+        plt.savefig(f'{title}.png', dpi=350)
+        print(f'{title}.png saved')
+    else:
+        plt.show()
+        
+def ch2_fig8a2(action):
+    title = 'ch2_fig8a2'
+
+    ref_tone = SineTone(a4)
+    test_tone = SineTone(a4)
+    T = two_octaves_symm
+
+    overlap = overlap_curve(
+        ref_tone,
+        test_tone,
+        transpose_domain=T,
+        function_type='PARNCUTT_BELL',
+        normalize=True,
+        options={
+            'crossterms_only': False,
+            'cutoff': False,
+            'original': False,
+            'show_partials': False
+        }
+    )
+
+    roughness = roughness_curve(
+        ref_tone,
+        test_tone,
+        transpose_domain=T,
+        function_type='PARNCUTT',
+        normalize=True,
+        options={
+            'crossterms_only': False,
+            'cutoff': False,
+            'original': False,
+            'show_partials': False
+        }
+    )
+
+    # Plot
+    _, ax = plt.subplots()
+    ax.plot(T.domain, overlap, color='k', linestyle='-', linewidth=2)
+    ax.plot(T.domain, roughness, color='k', linestyle='--', linewidth=2)
+    ax.legend(['HKP overlap', 'HKP roughness'], edgecolor='k')
     plt.xlabel('interval (semitones)')
     plt.ylabel('(arbitrary units)')
     ax.xaxis.set_major_locator(MultipleLocator(4))
@@ -414,12 +750,12 @@ def ch2_fig6a(action):
     else:
         plt.show()
 
-# Fi6ure 6b. Complex overlap curve.
-def ch2_fig6b(action):
-    title = 'ch2_fig6b'
+# Fi6ure 8b. Complex overlap curve.
+def ch2_fig8b1(action):
+    title = 'ch2_fig8b1'
 
-    ref_tone = HarrisonTone(12, a3)
-    test_tone = HarrisonTone(12, a3)
+    ref_tone = HarrisonTone(11, a3)
+    test_tone = HarrisonTone(11, a3)
     T = one_octave
 
     overlap = overlap_curve(
@@ -452,15 +788,66 @@ def ch2_fig6b(action):
         }
     )
 
-    ratio = roughness / overlap
-
     # Plot
     fig, ax = plt.subplots()
     fig.set_figwidth(10)
     ax.plot(T.domain, overlap, 'k', linewidth=1)
-    ax.plot(T.domain, ratio, 'k', linewidth=3)
     ax.plot(T.domain, roughness, 'k--', linewidth=1)
-    ax.legend(['overlap', 'roughness'], edgecolor='k')
+    ax.legend(['S overlap', 'S roughness'], edgecolor='k')
+    plt.xlabel('interval (semitones)')
+    plt.ylabel('(arbitrary units)')
+    plt.ylim(ymin=0.0)
+    ax.xaxis.set_major_locator(MultipleLocator(1))
+    ax.xaxis.set_major_formatter('{x:.0f}')
+    ax.yaxis.set_label_coords(-0.06, 0.5)
+
+    if action.lower() == 'save':
+        plt.savefig(f'{title}.png', dpi=350)
+        print(f'{title}.png saved')
+    else:
+        plt.show()
+    
+def ch2_fig8b2(action):
+    title = 'ch2_fig8b2'
+
+    ref_tone = HarrisonTone(11, a3)
+    test_tone = HarrisonTone(11, a3)
+    T = one_octave
+
+    overlap = overlap_curve(
+        ref_tone,
+        test_tone,
+        transpose_domain=T,
+        function_type='PARNCUTT_BELL',
+        normalize=False,
+        options={
+            'crossterms_only': False,
+            'cutoff': False,
+            'original': False,
+            'show_partials': False
+        }
+    )
+
+    roughness = roughness_curve(
+        ref_tone,
+        test_tone,
+        transpose_domain=T,
+        function_type='PARNCUTT',
+        normalize=False,
+        options={
+            'crossterms_only': False,
+            'cutoff': False,
+            'original': False,
+            'show_partials': False
+        }
+    )
+
+    # Plot
+    fig, ax = plt.subplots()
+    fig.set_figwidth(10)
+    ax.plot(T.domain, overlap, 'k', linewidth=2)
+    ax.plot(T.domain, roughness, 'k--', linewidth=2)
+    ax.legend(['HKP overlap', 'HKP roughness'], edgecolor='k')
     plt.xlabel('interval (semitones)')
     plt.ylabel('(arbitrary units)')
     plt.ylim(ymin=0.0)
@@ -474,24 +861,26 @@ def ch2_fig6b(action):
     else:
         plt.show()
 
-def ch2_fig7(action):
-    title = 'ch2_fig7'
+def ch2_fig9(action):
+    title = 'ch2_fig9'
 
-    ref_tone = HarrisonTone(7)
-    test_tone = HarrisonTone(7)
+    ref_tone = HarrisonTone(11)
+    test_tone = HarrisonTone(11)
     fund = a3
     T = one_octave
     # T = TransposeDomain(-0.5, 12.5, 200, 'ST_DIFF')
 
-    overlap_bell = overlap_curve(ref_tone, test_tone, transpose_domain=T, function_type='SETHARES_BELL')
+    overlap_sethares_bell = overlap_curve(ref_tone, test_tone, transpose_domain=T, function_type='SETHARES_BELL')
+    overlap_parncutt_bell = overlap_curve(ref_tone, test_tone, transpose_domain=T, function_type='PARNCUTT_BELL')
     overlap_cos = overlap_curve(ref_tone, test_tone, transpose_domain=T, function_type='COS')
     overlap_cbw = overlap_curve(ref_tone, test_tone, transpose_domain=T, function_type='CBW')
-    overlap_bell /= np.max(overlap_bell)
+    overlap_sethares_bell /= np.max(overlap_sethares_bell)
+    overlap_parncutt_bell /= np.max(overlap_parncutt_bell)
     overlap_cos /= np.max(overlap_cos)
     overlap_cbw /= np.max(overlap_cbw)
 
     Ks = [-0.2374, -2.374, -23.74]
-    overlaps_k = [overlap_curve(ref_tone, test_tone, transpose_domain=T, function_type='SETHARES_BELL', options={
+    sethares_overlaps_k = [overlap_curve(ref_tone, test_tone, transpose_domain=T, function_type='SETHARES_BELL', options={
         'amp_type': 'MIN',
         'crossterms_only': False,
         'cutoff': False,
@@ -499,7 +888,7 @@ def ch2_fig7(action):
         'K': k
         }) for k in Ks
     ]
-    overlaps_k = [curve / np.max(curve) for curve in overlaps_k]
+    sethares_overlaps_k = [curve / np.max(curve) for curve in sethares_overlaps_k]
 
     #Plot
     fig, ax = plt.subplots(2,1)
@@ -507,15 +896,16 @@ def ch2_fig7(action):
     fig.set_figwidth(10)
     plt.tight_layout()
     plt.subplots_adjust(left=0.16, hspace=0.3, bottom=0.1)
-    ax[0].plot(T.domain, overlap_bell, 'k')
+    ax[0].plot(T.domain, overlap_sethares_bell, 'k', linewidth=1)
+    ax[0].plot(T.domain, overlap_parncutt_bell, 'k', linewidth=2)
     ax[0].plot(T.domain, overlap_cos, 'k--')
     ax[0].plot(T.domain, overlap_cbw, 'k-.')
-    ax[0].legend(['current', 'cos', 'indicator'], edgecolor='k')
+    ax[0].legend(['S-like model', 'HKP-like model', 'cos', 'indicator'], edgecolor='k')
     ax[0].set_ylim(0, 1.1)
     ax[1].set_ylim(0, 1.1)
-    ax[1].plot(T.domain, overlaps_k[0], 'k-.')
-    ax[1].plot(T.domain, overlaps_k[1], 'k-')
-    ax[1].plot(T.domain, overlaps_k[2], 'k--')
+    ax[1].plot(T.domain, sethares_overlaps_k[0], 'k-.')
+    ax[1].plot(T.domain, sethares_overlaps_k[1], 'k-')
+    ax[1].plot(T.domain, sethares_overlaps_k[2], 'k--')
     ax[1].legend(['K = -0.24', 'K = -2.4', 'K = -24'], edgecolor='k')
     ax[0].xaxis.set_major_locator(MultipleLocator(1))
     ax[0].xaxis.set_major_formatter('{x:.0f}')
@@ -525,7 +915,7 @@ def ch2_fig7(action):
     ax[0].set_ylabel('overlap\n(arbitrary units)')
     ax[0].yaxis.set_label_coords(-0.06, 0.50)
     ax[1].set_xlabel('interval (semitones)')
-    ax[1].set_ylabel('relative roughness\n(arbitrary units)')
+    ax[1].set_ylabel('S-like overlap\n(arbitrary units)')
     ax[1].yaxis.set_label_coords(-0.06, 0.50)
     fig.add_artist(plt.Text(0.03, 0.75, '(a)', size=16.0, weight='bold'))
     fig.add_artist(plt.Text(0.03, 0.25, '(b)', size=16.0, weight='bold'))
@@ -536,12 +926,12 @@ def ch2_fig7(action):
     else:
         plt.show()
 
-# Figure 8. Plot of relative roughness over 1 octave, above A3.
-def ch2_fig8(action):
-    title = 'ch2_fig8'
+# Figure 10. Plot of relative roughness over 1 octave, above A3.
+def ch2_fig10a1(action):
+    title = 'ch2_fig10a1'
 
-    ref_tone = HarrisonTone(12, a3)
-    test_tone = HarrisonTone(12, a3)
+    ref_tone = HarrisonTone(11, a3)
+    test_tone = HarrisonTone(11, a3)
     T = one_octave
 
     overlap = overlap_curve(
@@ -574,23 +964,23 @@ def ch2_fig8(action):
         }
     )
 
-    # log_ratio = np.log(roughness / overlap)
+    log_ratio = np.log(roughness / overlap)
     ratio = (roughness / overlap)
 
-    # log_ratio = log_ratio / np.max(np.abs(log_ratio))
+    log_ratio = log_ratio / np.max(np.abs(log_ratio))
     ratio = ratio / np.max(ratio)
     roughness = roughness / np.max(roughness)
 
     # Plot
     fig, ax = plt.subplots()
     fig.set_figwidth(10)
-    # ax.plot(T.domain, log_ratio, 'k', linewidth=3)
-    ax.plot(T.domain, ratio, 'k', linewidth=3)
-    ax.plot(T.domain, roughness, 'k--')
+    ax.plot(T.domain, log_ratio, 'k', linewidth=1)
+    # ax.plot(T.domain, ratio, 'k', linewidth=1)
+    # ax.plot(T.domain, roughness, 'k--', linewidth=1)
     plt.xlabel('interval (semitones)')
-    plt.ylabel('relative roughness\n(arbitrary units)')
-    ax.legend(['relative roughness', 'roughness'], edgecolor='k')
-    plt.ylim(ymin=0.0)
+    plt.ylabel('roughness\n(arbitrary units)')
+    ax.legend(['S-like relative roughness', 'S-model roughness'], edgecolor='k', loc='upper center')
+    # plt.ylim(ymin=0.0)
     ax.xaxis.set_major_locator(MultipleLocator(1))
     ax.xaxis.set_major_formatter('{x:.0f}')
     ax.yaxis.set_label_coords(-0.06, 0.5)
@@ -601,11 +991,199 @@ def ch2_fig8(action):
     else:
         plt.show()
 
-def ch2_fig8_app(action):
-    title = 'ch2_fig8_app'
+def ch2_fig10a2(action):
+    title = 'ch2_fig10a2'
 
-    ref_tone = HarrisonTone(7)
-    test_tone = HarrisonTone(7)
+    ref_tone = HarrisonTone(11, a3)
+    test_tone = HarrisonTone(11, a3)
+    T = one_octave
+
+    overlap = overlap_curve(
+        ref_tone,
+        test_tone,
+        transpose_domain=T,
+        function_type='PARNCUTT_BELL',
+        normalize=False,
+        options={
+            'crossterms_only': False,
+            'cutoff': False,
+            'original': False,
+            'show_partials': False
+        }
+    )
+
+    roughness = roughness_curve(
+        ref_tone,
+        test_tone,
+        transpose_domain=T,
+        function_type='PARNCUTT',
+        normalize=False,
+        options={
+          'crossterms_only': False,
+          'cutoff': False,
+          'original': False,
+          'show_partials': False
+        }
+    )
+
+    log_ratio = np.log(roughness / overlap)
+    ratio = (roughness / overlap)
+
+    log_ratio = log_ratio / np.max(np.abs(log_ratio))
+    ratio = ratio / np.max(ratio)
+    roughness = roughness / np.max(roughness)
+
+    # Plot
+    fig, ax = plt.subplots()
+    fig.set_figwidth(10)
+    ax.plot(T.domain, log_ratio, 'k', linewidth=2)
+    # ax.plot(T.domain, ratio, 'k', linewidth=2)
+    # ax.plot(T.domain, roughness, 'k--', linewidth=2)
+    plt.xlabel('interval (semitones)')
+    plt.ylabel('roughness\n(arbitrary units)')
+    ax.legend(['HKP-like relative roughness', 'HKP-model roughness'], edgecolor='k', loc='upper center')
+    # plt.ylim(ymin=0.0)
+    ax.xaxis.set_major_locator(MultipleLocator(1))
+    ax.xaxis.set_major_formatter('{x:.0f}')
+    ax.yaxis.set_label_coords(-0.06, 0.5)
+
+    if action.lower() == 'save':
+        plt.savefig(f'{title}.png', dpi=350)
+        print(f'{title}.png saved')
+    else:
+        plt.show()
+
+def ch2_fig10b1(action):
+    title = 'ch2_fig10b1'
+
+    ref_tone = SetharesTone(11, a3)
+    test_tone = SetharesTone(11, a3)
+    T = one_octave
+
+    overlap = overlap_curve(
+        ref_tone,
+        test_tone,
+        transpose_domain=T,
+        function_type='SETHARES_BELL',
+        normalize=False,
+        options={
+          'amp_type': 'MIN',
+          'crossterms_only': False,
+          'cutoff': False,
+          'original': False,
+          'show_partials': False
+        }
+    )
+
+    roughness = roughness_curve(
+        ref_tone,
+        test_tone,
+        transpose_domain=T,
+        function_type='SETHARES',
+        normalize=False,
+        options={
+          'amp_type': 'MIN',
+          'crossterms_only': False,
+          'cutoff': False,
+          'original': False,
+          'show_partials': False
+        }
+    )
+
+    log_ratio = np.log(roughness / overlap)
+    ratio = (roughness / overlap)
+
+    log_ratio = log_ratio / np.max(np.abs(log_ratio))
+    ratio = ratio / np.max(ratio)
+    roughness = roughness / np.max(roughness)
+
+    # Plot
+    fig, ax = plt.subplots()
+    fig.set_figwidth(10)
+    ax.plot(T.domain, log_ratio, 'k', linewidth=1)
+    # ax.plot(T.domain, ratio, 'k', linewidth=1)
+    # ax.plot(T.domain, roughness, 'k--', linewidth=1)
+    plt.xlabel('interval (semitones)')
+    plt.ylabel('roughness\n(arbitrary units)')
+    ax.legend(['S-like relative roughness', 'S-model roughness'], edgecolor='k', loc='upper center')
+    # plt.ylim(ymin=0.0)
+    ax.xaxis.set_major_locator(MultipleLocator(1))
+    ax.xaxis.set_major_formatter('{x:.0f}')
+    ax.yaxis.set_label_coords(-0.06, 0.5)
+
+    if action.lower() == 'save':
+        plt.savefig(f'{title}.png', dpi=350)
+        print(f'{title}.png saved')
+    else:
+        plt.show()
+
+def ch2_fig10b2(action):
+    title = 'ch2_fig10b2'
+
+    ref_tone = SetharesTone(11, a3)
+    test_tone = SetharesTone(11, a3)
+    T = one_octave
+
+    overlap = overlap_curve(
+        ref_tone,
+        test_tone,
+        transpose_domain=T,
+        function_type='PARNCUTT_BELL',
+        normalize=False,
+        options={
+            'crossterms_only': False,
+            'cutoff': False,
+            'original': False,
+            'show_partials': False
+        }
+    )
+
+    roughness = roughness_curve(
+        ref_tone,
+        test_tone,
+        transpose_domain=T,
+        function_type='PARNCUTT',
+        normalize=False,
+        options={
+          'crossterms_only': False,
+          'cutoff': False,
+          'original': False,
+          'show_partials': False
+        }
+    )
+
+    log_ratio = np.log(roughness / overlap)
+    ratio = (roughness / overlap)
+
+    log_ratio = log_ratio / np.max(np.abs(log_ratio))
+    ratio = ratio / np.max(ratio)
+    roughness = roughness / np.max(roughness)
+
+    # Plot
+    fig, ax = plt.subplots()
+    fig.set_figwidth(10)
+    ax.plot(T.domain, log_ratio, 'k', linewidth=2)
+    # ax.plot(T.domain, ratio, 'k', linewidth=2)
+    # ax.plot(T.domain, roughness, 'k--', linewidth=2)
+    plt.xlabel('interval (semitones)')
+    plt.ylabel('roughness\n(arbitrary units)')
+    ax.legend(['HKP-like relative roughness', 'HKP-model roughness'], edgecolor='k', loc='upper center')
+    # plt.ylim(ymin=0.0)
+    ax.xaxis.set_major_locator(MultipleLocator(1))
+    ax.xaxis.set_major_formatter('{x:.0f}')
+    ax.yaxis.set_label_coords(-0.06, 0.5)
+
+    if action.lower() == 'save':
+        plt.savefig(f'{title}.png', dpi=350)
+        print(f'{title}.png saved')
+    else:
+        plt.show()
+
+def ch2_fig10_app(action):
+    title = 'ch2_fig10_app'
+
+    ref_tone = HarrisonTone(11)
+    test_tone = HarrisonTone(11)
     T = one_octave
 
     overlap1= overlap_curve(
@@ -667,7 +1245,7 @@ def ch2_fig8_app(action):
     # ax.plot(T.domain, roughness2, 'c-.')
     # ax.plot(T.domain, overlap2, 'c--')
     plt.xlabel('interval (semitones)')
-    plt.ylabel('relative roughness\n(arbitrary units)')
+    plt.ylabel('(arbitrary units)')
     ax.xaxis.set_major_locator(MultipleLocator(1))
     ax.xaxis.set_major_formatter('{x:.0f}')
     ax.yaxis.set_label_coords(-0.06, 0.5)
@@ -678,94 +1256,59 @@ def ch2_fig8_app(action):
     else:
         plt.show()
 
-# Figure 9. Sensitivity of relative roughness to presence of higher partials.
-def ch2_fig9(action):
-    title = 'ch2_fig9'
 
-    ref_8 = HarrisonTone(8)
-    test_8 = HarrisonTone(8)
-    ref_9 = HarrisonTone(9)
-    test_9 = HarrisonTone(9)
-    T = one_octave
-    # T = TransposeDomain(-0.5, 12.5, 11, 'ST_DIFF')
 
-    rough_8 = roughness_curve(ref_8, test_8, transpose_domain=T, function_type='SETHARES', normalize=True)
-    rough_9 = roughness_curve(ref_9, test_9, transpose_domain=T, function_type='SETHARES', normalize=True)
-    overlap_8 = overlap_curve(ref_8, test_8, transpose_domain=T, function_type='SETHARES_BELL', normalize=True)
-    overlap_9 = overlap_curve(ref_9, test_9, transpose_domain=T, function_type='SETHARES_BELL', normalize=True)
-    ratio_8 = rough_8 / overlap_8
-    ratio_9 = rough_9 / overlap_9
-    ratio_8 /= max(ratio_8)
-    ratio_9 /= max(ratio_9)
+# Figure 11. Relative roughnesses of a major seventh chord and its subsets.
+def ch2_fig11(action):
+    title = 'ch2_fig11'
 
-    # Plots
-    fig, ax = plt.subplots(2,1)
-    fig.set_figheight(6)
-    fig.set_figwidth(10)
-    plt.tight_layout()
-    plt.subplots_adjust(left=0.16, hspace=0.3, bottom=0.1)
-    ax[0].plot(T.domain, overlap_8, 'k')
-    ax[0].plot(T.domain, overlap_9, 'k--')
-    ax[0].legend(['8 partials', '9 partials'], edgecolor='k')
-    ax[0].set_ylim(0, 1.1)
-    ax[1].set_ylim(0, 1.1)
-    ax[1].plot(T.domain, ratio_8, 'k')
-    ax[1].plot(T.domain, ratio_9, 'k--')
-    ax[1].legend(['8 partials', '9 partials'], edgecolor='k')
-    ax[0].xaxis.set_major_locator(MultipleLocator(1))
-    ax[0].xaxis.set_major_formatter('{x:.0f}')
-    ax[1].xaxis.set_major_locator(MultipleLocator(1))
-    ax[1].xaxis.set_major_formatter('{x:.0f}')
-    ax[0].set_xlabel('interval (semitones)')
-    ax[0].set_ylabel('overlap\n(arbitrary units)')
-    ax[0].yaxis.set_label_coords(-0.06, 0.50)
-    ax[1].set_xlabel('interval (semitones)')
-    ax[1].set_ylabel('relative roughness\n(arbitrary units)')
-    ax[1].yaxis.set_label_coords(-0.06, 0.50)
-    ax[0].annotate('', xy=(2,0.1), xytext=(2,0.2), arrowprops={'arrowstyle': '->'})
-    ax[1].annotate('', xy=(1.9,0.09), xytext=(1.5,0.03), arrowprops={'arrowstyle': '->'})
-    fig.add_artist(plt.Text(0.03, 0.75, '(a)', size=16.0, weight='bold'))
-    fig.add_artist(plt.Text(0.03, 0.25, '(b)', size=16.0, weight='bold'))
+    # tim = HarrisonTimbre(11)
+    tim = SetharesTimbre(11)
+    fund = a3
 
-    if action.lower() == 'save':
-        plt.savefig(f'{title}.png', dpi=350)
-        print(f'{title}.png saved')
-    else:
-        plt.show()
-
-# Figure 10. Relative roughnesses of a major seventh chord and its subsets.
-def ch2_fig10(action):
-    title = 'ch2_fig10'
-
-    tim = HarrisonTimbre(12)
-    fund = c4
-
+    # chord_names = [
+    #     ('[C4, E4]', [0, 4]),
+    #     ('[C4, G4]', [0, 7]),
+    #     ('[C4, B4]', [0, 11]),
+    #     ('[E4, G4]', [4, 7]),
+    #     ('[E4, B4]', [4, 11]),
+    #     ('[G4, B4]', [7, 11]),
+    #     ('[C4, E4, G4]', [0, 4, 7]),
+    #     ('[C4, E4, B4]', [0, 4, 11]),
+    #     ('[C4, G4, B4]', [0, 7, 11]),
+    #     ('[E4, G4, B4]', [4, 7, 11]),
+    #     ('[C4, E4, G4, B4]', [0, 4, 7, 11])
+    # ]
+    
     chord_names = [
-        ('[C4, E4]', [0, 4]),
-        ('[C4, G4]', [0, 7]),
-        ('[C4, B4]', [0, 11]),
-        ('[E4, G4]', [4, 7]),
-        ('[E4, B4]', [4, 11]),
-        ('[G4, B4]', [7, 11]),
-        ('[C4, E4, G4]', [0, 4, 7]),
-        ('[C4, E4, B4]', [0, 4, 11]),
-        ('[C4, G4, B4]', [0, 7, 11]),
-        ('[E4, G4, B4]', [4, 7, 11]),
-        ('[C4, E4, G4, B4]', [0, 4, 7, 11])
+        ('0', [0, 0]),
+        ('1', [0, 1]),
+        ('2', [0, 2]),
+        ('3', [0, 3]),
+        ('4', [0, 4]),
+        ('5', [0, 5]),
+        ('6', [0, 6]),
+        ('7', [0, 7]),
+        ('8', [0, 8]),
+        ('9', [0, 9]),
+        ('10', [0, 10]),
+        ('11', [0, 11])
     ]
 
     chords = [ChordSpectrum(chord_name[1], 'ST_DIFF', timbre=tim, fund_hz=fund) for chord_name in chord_names]
-    roughnesses = np.array([roughness_complex(chord, 'SETHARES') for chord in chords])
-    overlaps = np.array([overlap_complex(chord, 'SETHARES_BELL') for chord in chords])
-    # log_ratios = np.log(roughnesses / overlaps)
-    ratios = (roughnesses / overlaps)
+    # roughnesses = np.array([roughness_complex(chord, 'SETHARES') for chord in chords])
+    # overlaps = np.array([overlap_complex(chord, 'SETHARES_BELL') for chord in chords])
+    roughnesses = np.array([roughness_complex(chord, 'PARNCUTT') for chord in chords])
+    overlaps = np.array([overlap_complex(chord, 'PARNCUTT_BELL') for chord in chords])
+    log_ratios = np.log(roughnesses / overlaps)
+    # ratios = (roughnesses / overlaps)
 
-    # chord_data = zip(chord_names, roughnesses, log_ratios)
-    chord_data = zip(chord_names, roughnesses, ratios)
+    chord_data = zip(chord_names, roughnesses, log_ratios)
+    # chord_data = zip(chord_names, roughnesses, ratios)
     # print(list(zip(*sorted(chord_data, key=lambda chord: chord[1]))))
     [roughness_sorted_names, roughness_sorted_vals, _] = list(zip(*sorted(chord_data, key=lambda chord: chord[1])))
-    # chord_data = zip(chord_names, roughnesses, log_ratios)
-    chord_data = zip(chord_names, roughnesses, ratios)
+    chord_data = zip(chord_names, roughnesses, log_ratios)
+    # chord_data = zip(chord_names, roughnesses, ratios)
     [ratio_sorted_names, _, ratio_sorted_vals] = list(zip(*sorted(chord_data, key=lambda chord: chord[2])))
     roughness_sorted_labels = [name[0] for name in roughness_sorted_names]
     ratio_sorted_labels = [name[0] for name in ratio_sorted_names]
@@ -778,9 +1321,11 @@ def ch2_fig10(action):
     ax[1].bar(ratio_sorted_labels, ratio_sorted_vals, fill=False, hatch='///')
 
     ax[0].set_ylabel('roughness\n(arbitrary units)')
+    ax[0].set_xlabel('interval above A3')
     ax[1].set_ylabel('relative roughness\n(arbitrary units)')
-    ax[0].tick_params(axis='x', labelrotation=90)
-    ax[1].tick_params(axis='x', labelrotation=90)
+    ax[1].set_xlabel('interval above A3')
+    # ax[0].tick_params(axis='x', labelrotation=90)
+    # ax[1].tick_params(axis='x', labelrotation=90)
     plt.subplots_adjust(bottom=0.3)
 
     if action.lower() == 'save':
@@ -789,11 +1334,11 @@ def ch2_fig10(action):
     else:
         plt.show()
 
-def ch2_fig11(action):
-    title = 'ch2_fig11'
+def ch2_fig12(action):
+    title = 'ch2_fig12'
 
-    ref_triad = HarrisonMajTriad(12, a3)
-    test_tone = HarrisonTone(12, a3)
+    ref_triad = HarrisonMajTriad(11, a3)
+    test_tone = HarrisonTone(11, a3)
     T = TransposeDomain(-0.5, 17.5, 1801, 'ST_DIFF')
 
     roughness = roughness_curve(
@@ -854,14 +1399,14 @@ def ch2_fig11(action):
     else:
         plt.show()
 
-def ch2_fig13(action):
-    title = 'ch2_fig13'
+def ch2_fig14(action):
+    title = 'ch2_fig14'
 
-    tim = HarrisonTimbre(12)
+    tim = HarrisonTimbre(11)
     fund = midi_zero
 
     backdrop_pitches = [
-        # data temporarily redacted
+        # data redacted
     ]
 
     m18m_backdrops = [
@@ -898,18 +1443,18 @@ def ch2_fig13(action):
     else:
         plt.show()
 
-def ch2_fig14a(action):
-    title = 'ch2_fig14a'
+def ch2_fig15a(action):
+    title = 'ch2_fig15a'
 
-    tim = HarrisonTimbre(12)
+    tim = HarrisonTimbre(11)
     fund_i = d4
 
     m18m_i_arch_a = [
-        # data temporarily redacted
+        # data redacted
     ]
 
     m18m_i_arch_b = [
-        # data temporarily redacted
+        # data redacted
     ]
 
     a_rough = np.array([roughness_complex(MergedSpectrum(ChordSpectrum(chord, 'ST_DIFF', timbre=tim, fund_hz=fund_i)), function_type='SETHARES') for chord in m18m_i_arch_a])
@@ -940,10 +1485,10 @@ def ch2_fig14a(action):
     else:
         plt.show()
 
-def ch2_fig14b(action):
-    title = 'ch2_fig14b'
+def ch2_fig15b(action):
+    title = 'ch2_fig15b'
 
-    tim = HarrisonTimbre(12)
+    tim = HarrisonTimbre(11)
     fund_ix = midi_zero
     m18m_ix_backdrop = [] # data temporarily redacted
     m18m_ix_loop_top = [
@@ -974,8 +1519,63 @@ def ch2_fig14b(action):
     else:
         plt.show()
 
+# Figure 16. Sensitivity of relative roughness to presence of higher partials.
 def ch2_fig16(action):
     title = 'ch2_fig16'
+
+    ref_8 = HarrisonTone(8)
+    test_8 = HarrisonTone(8)
+    ref_9 = HarrisonTone(9)
+    test_9 = HarrisonTone(9)
+    T = one_octave
+    # T = TransposeDomain(-0.5, 12.5, 11, 'ST_DIFF')
+
+    rough_8 = roughness_curve(ref_8, test_8, transpose_domain=T, function_type='SETHARES', normalize=True)
+    rough_9 = roughness_curve(ref_9, test_9, transpose_domain=T, function_type='SETHARES', normalize=True)
+    overlap_8 = overlap_curve(ref_8, test_8, transpose_domain=T, function_type='SETHARES_BELL', normalize=True)
+    overlap_9 = overlap_curve(ref_9, test_9, transpose_domain=T, function_type='SETHARES_BELL', normalize=True)
+    ratio_8 = rough_8 / overlap_8
+    ratio_9 = rough_9 / overlap_9
+    ratio_8 /= max(ratio_8)
+    ratio_9 /= max(ratio_9)
+
+    # Plots
+    fig, ax = plt.subplots(2,1)
+    fig.set_figheight(6)
+    fig.set_figwidth(10)
+    plt.tight_layout()
+    plt.subplots_adjust(left=0.16, hspace=0.3, bottom=0.1)
+    ax[0].plot(T.domain, overlap_8, 'k')
+    ax[0].plot(T.domain, overlap_9, 'k--')
+    ax[0].legend(['8 partials', '9 partials'], edgecolor='k')
+    ax[0].set_ylim(0, 1.1)
+    ax[1].set_ylim(0, 1.1)
+    ax[1].plot(T.domain, ratio_8, 'k')
+    ax[1].plot(T.domain, ratio_9, 'k--')
+    ax[1].legend(['8 partials', '9 partials'], edgecolor='k')
+    ax[0].xaxis.set_major_locator(MultipleLocator(1))
+    ax[0].xaxis.set_major_formatter('{x:.0f}')
+    ax[1].xaxis.set_major_locator(MultipleLocator(1))
+    ax[1].xaxis.set_major_formatter('{x:.0f}')
+    ax[0].set_xlabel('interval (semitones)')
+    ax[0].set_ylabel('overlap\n(arbitrary units)')
+    ax[0].yaxis.set_label_coords(-0.06, 0.50)
+    ax[1].set_xlabel('interval (semitones)')
+    ax[1].set_ylabel('relative roughness\n(arbitrary units)')
+    ax[1].yaxis.set_label_coords(-0.06, 0.50)
+    ax[0].annotate('', xy=(2,0.1), xytext=(2,0.2), arrowprops={'arrowstyle': '->'})
+    ax[1].annotate('', xy=(1.9,0.09), xytext=(1.5,0.03), arrowprops={'arrowstyle': '->'})
+    fig.add_artist(plt.Text(0.03, 0.75, '(a)', size=16.0, weight='bold'))
+    fig.add_artist(plt.Text(0.03, 0.25, '(b)', size=16.0, weight='bold'))
+
+    if action.lower() == 'save':
+        plt.savefig(f'{title}.png', dpi=350)
+        print(f'{title}.png saved')
+    else:
+        plt.show()
+
+def ch2_fig18(action):
+    title = 'ch2_fig18'
 
     maxDenom = 12
 
@@ -994,12 +1594,28 @@ def ch2_fig16(action):
     test_tone = FlatSawTone(12)
     T = TransposeDomain(1.0, 2.0, 1000, 'SCALE_FACTOR')
 
-    overlap = overlap_curve(ref_tone, test_tone, transpose_domain=T, function_type='SETHARES_BELL', normalize=True)
+    overlap = overlap_curve(
+        ref_tone,
+        test_tone,
+        transpose_domain=T,
+        function_type='SETHARES_BELL',
+        normalize=True,
+        options={
+            'crossterms_only': False,
+            'show_partials': False,
+            'amp_type': 'MIN',
+            'cutoff': False,
+            'K': -23.74
+        }
+    )
 
     # Plot
     fig, ax = plt.subplots()
-    ax.plot(T.domain, overlap, 'k--', linewidth=0.5)
-    ax.stem(interval, overlap_ideal, linefmt='k', markerfmt=' ', basefmt=' ')
+    ax.plot(T.domain, overlap, 'k-', linewidth=2)
+    markers, stemlines, _ = ax.stem(interval, overlap_ideal, linefmt='k--', markerfmt='o', basefmt=' ')
+    plt.setp(stemlines, linewidth=1)
+    plt.setp(markers, markersize=5, markeredgecolor='k', markerfacecolor='w')
+    ax.legend(['S-like overlap (steep slope)', 'C function'], edgecolor='k')
     ax.set_ylim(0)
     plt.xlabel('interval (ratio)')
     plt.ylabel('overlap (arbitrary units)')
@@ -1065,156 +1681,7 @@ def ch2_fig1b_appendix(action):
     else:
         plt.show()
 
-# Figure 5. HKP and Sethares roughness for Fratres chords
-# Figure 15 (also). Sethares roughness and relative roughness for Fratres chords
-# These are versions of the graphs that include all chords, not only the posts.
-def ch2_fig5a_15a(action):
-    title1 = 'ch2_fig5a'
-    title2 = 'ch2_fig5b'
-    title3 = 'ch2_fig5c'
-    title4 = 'ch2_fig5d'
-    title2 = 'ch2_fig15a'
-    
-    tim = HarrisonTimbre(12)
-    fund = midi_zero
-    
-    # A helpful function to normalize so the first value is 1
-    def first_value_one(lst):
-        return lst / lst[0]
-    
-    # Helper function perform the various manipulations for each curve
-    def get_curves(lst):
-        fratres = [ChordSpectrum(chord, 'ST_DIFF', timbre=tim, fund_hz=fund) for chord in lst]
-        sethares_roughness = np.array([roughness_complex(chord, 'SETHARES') for chord in fratres])
-        sethares_overlap = np.array([overlap_complex(chord, 'SETHARES_BELL') for chord in fratres])
-        parncutt_roughness = np.array([roughness_complex(chord, 'PARNCUTT') for chord in fratres])
-        parncutt_overlap = np.array([overlap_complex(chord, 'PARNCUTT_BELL') for chord in fratres])
-        
-        sethares_ratio = sethares_roughness / sethares_overlap
-        parncutt_ratio = parncutt_roughness / parncutt_overlap
-        
-        sethares_roughness_n = first_value_one(sethares_roughness)
-        parncutt_roughness_n = first_value_one(parncutt_roughness)
-        sethares_ratio_n = first_value_one(sethares_ratio)
-        parncutt_ratio_n = first_value_one(parncutt_ratio)
-        
-        return {
-            'sethares_roughness': sethares_roughness_n,
-            'parncutt_roughness': parncutt_roughness_n,
-            'sethares_ratio': sethares_ratio_n,
-            'parncutt_ratio': parncutt_ratio_n
-        }
-    
-    # The lower octave is not doubled, following the holograph score shown at
-    # on the Arvo Pärt Centre website, https://www.arvopart.ee/en/arvo-part/work/390/
-    
-    fratres_all = get_curves(fratres_8vedrone_cb8va)
-    fratres_no_cb = get_curves(fratres_8vedrone_nocb8ves)
-    fratres_sections_start = get_curves(fratres_phrase_start_sonorities)
-    fratres_sections_end = get_curves(fratres_phrase_end_sonorities)
-    fratres_tenths = get_curves(fratres_tenths_only)
-    
-    section_axis = ['drone'] + list(range(1,10))
-    
-    # Plots
-    
-    # Fig 5a
-    plt.figure('5a')
-    fig, ax = plt.subplots()
-    fig.set_figwidth(10)
-    l = len(fratres_all['sethares_roughness'])
-    plt.plot(np.arange(l), fratres_all['sethares_roughness'], 'k', linewidth=1)
-    plt.plot(np.arange(l), fratres_all['parncutt_roughness'], 'k', linewidth=3)
-    plt.legend(['S model', 'HKP model'],edgecolor='k',prop={'size': 8.5})
-    plt.xlabel('quarter-note beats from start')
-    plt.ylabel('roughness (arbitrary units)')
-    plt.ylim(ymin=0.0)
-    ax.yaxis.set_label_coords(-0.06, 0.5)
-    
-    if action.lower() == 'save':
-        plt.savefig(title1 + '.png', dpi=350)
-        print(title1 + '.png saved')
-    else:
-        plt.show(block=True)
-    
-    # Fig 5b
-    plt.figure('5b')
-    fig, ax = plt.subplots()
-    fig.set_figwidth(10)
-    l = len(fratres_no_cb['sethares_roughness'])
-    plt.plot(np.arange(l), fratres_no_cb['sethares_roughness'], 'k', linewidth=1)
-    plt.plot(np.arange(l), fratres_no_cb['parncutt_roughness'], 'k', linewidth=3)
-    plt.legend(['S model', 'HKP model'],edgecolor='k',prop={'size': 8.5})
-    plt.xlabel('quarter-note beats from start')
-    plt.ylabel('roughness (arbitrary units)')
-    plt.ylim(ymin=0.0)
-    ax.yaxis.set_label_coords(-0.06, 0.5)
-    
-    if action.lower() == 'save':
-        plt.savefig(title2 + '.png', dpi=350)
-        print(title2 + '.png saved')
-    else:
-        plt.show(block=True)
-    
-    # Fig 5c
-    plt.figure('5c')
-    fig, ax = plt.subplots()
-    fig.set_figwidth(10)
-    l = len(fratres_sections_start)
-    plt.plot(section_axis, fratres_sections_start['sethares_roughness'], 'k', linewidth=1)
-    plt.plot(section_axis, fratres_sections_start['parncutt_roughness'], 'k', linewidth=3)
-    plt.plot(section_axis, fratres_sections_end['sethares_roughness'], 'k', linewidth=1)
-    plt.plot(section_axis, fratres_sections_end['parncutt_roughness'], 'k', linewidth=3)
-    plt.legend(['S model', 'HKP model'],edgecolor='k',prop={'size': 8.5})
-    plt.xlabel('section')
-    plt.ylabel('roughness (arbitrary units)')
-    plt.ylim(ymin=0.0)
-    ax.yaxis.set_label_coords(-0.06, 0.5)
-    
-    if action.lower() == 'save':
-        plt.savefig(title3 + '.png', dpi=350)
-        print(title3 + '.png saved')
-    else:
-        plt.show(block=True)
-    
-    # Fig 5d
-    plt.figure('5d')
-    fig, ax = plt.subplots()
-    fig.set_figwidth(10)
-    l = len(fratres_tenths)
-    plt.plot(section_axis, fratres_tenths['sethares_roughness'], 'k', linewidth=1)
-    plt.plot(section_axis, fratres_tenths['parncutt_roughness'], 'k', linewidth=3)
-    plt.legend(['S model', 'HKP model'],edgecolor='k',prop={'size': 8.5})
-    plt.xlabel('quarter-note beats from start')
-    plt.ylabel('roughness (arbitrary units)')
-    plt.ylim(ymin=0.0)
-    ax.yaxis.set_label_coords(-0.06, 0.5)
-    
-    if action.lower() == 'save':
-        plt.savefig(title4 + '.png', dpi=350)
-        print(title4 + '.png saved')
-    else:
-        plt.show(block=True)
-    
-    
-    # Fig 13
-    # plt.figure(13)
-    # fig, ax = plt.subplots()
-    # fig.set_figwidth(10)
-    # plt.plot(np.arange(l), fratres_sethares_outer_ratio_n, 'k', linewidth=0.5)
-    # # plt.plot(np.arange(l), fratres_sethares_outer_diss_n, 'k--')
-    # plt.legend(['relative roughness', 'roughness'], edgecolor='k')
-    # plt.xlabel('quarter-note beat')
-    # plt.ylabel('roughness (arbitrary units)')
-    # plt.ylim(ymin=0.0)
-    # ax.yaxis.set_label_coords(-0.06, 0.5)
-    
-    # if action.lower() == 'save':
-    #     plt.savefig(title2 + '.png', dpi=350)
-    #     print(title2 + '.png saved')
-    
-    # else:
-    #     plt.show(block=False)
+
 
 
 def __main__(argv):
@@ -1222,24 +1689,31 @@ def __main__(argv):
     if len(argv) > 1:
         action = argv[1].lower()
 
-    # ch2_fig1a(action)
+    # helmholtz_pair(action)
+    timbre_plots(action)
     # ch2_fig2a(action)
     # ch2_fig2b(action)
     # ch2_fig5_15(action)
-    ch2_fig5a_15a(action)
-    # ch2_fig4(action)
-    # ch2_fig5(action)
     # ch2_fig6(action)
-    # ch2_fig7(action)
-    # ch2_fig8(action)
+    # ch2_fig7a(action)
+    # ch2_fig7b(action)
+    # ch2_fig8a1(action)
+    # ch2_fig8a2(action)
+    # ch2_fig8b1(action)
+    # ch2_fig8b2(action)
     # ch2_fig9(action)
-    # ch2_fig10(action)
+    # ch2_fig10a1(action)
+    # ch2_fig10a2(action)
+    # ch2_fig10b1(action)
+    # ch2_fig10b2(action)
     # ch2_fig11(action)
     # ch2_fig12(action)
     # ch2_fig13(action)
     # ch2_fig14a(action)
     # ch2_fig14b(action)
     # ch2_fig16(action)
+    # ch2_fig18(action)
+    plt.close('all')
 
 if __name__ == '__main__':
     __main__(sys.argv)

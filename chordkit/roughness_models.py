@@ -92,7 +92,7 @@ def cbw_roughness_pair(x_hz, ref_hz, v_x, v_ref, options={ 'amp_type': 'MIN' }):
     else:
         return 0
 
-# From Bigand, Parncutt, and Lerdahl 1996. Note that the volumes are not used.
+# From Hutchinson and Knopoff 1978 and Bigand, Parncutt, and Lerdahl 1996.
 def parncutt_roughness_pair(x_hz, ref_hz, v_x, v_ref, options = {}):
     # Parameters asserted in BPL 1996 paper
     a = 0.25
@@ -103,8 +103,11 @@ def parncutt_roughness_pair(x_hz, ref_hz, v_x, v_ref, options = {}):
     freq_median_cbw = cbw_hutchinson(freq_median)
     distance = freq_difference / freq_median_cbw
 
+    # Volume scaling (cf. Hutchinson and Knopoff 1978, 3)
+    amp = v_x * v_ref / (v_x * v_x + v_ref * v_ref)
+
     if distance < 1.2:
-        return ((np.exp(1)/a) * distance * np.exp(-distance / a)) ** i_factor
+        return amp * (((np.exp(1)/a) * distance * np.exp(-distance / a)) ** i_factor)
     else:
         return 0
 
