@@ -20,12 +20,35 @@ from chord_lists import (fratres_8vedrone_nocb8ves, fratres_8vedrone_cb8va,
 figure_idx = {
     'helmholtz_pair': '1a',
     'timbre_plots': '2',
-    'pair_roughness': '3a'
+    'pair_roughness': '3a',
+    'complex_roughness': '3b', # add on from here
+    'fratres_roughness': '6',
+    'cardinality_proximity': '7',
+    'octave_drift_sethares': '8a',
+    'octave_drift_parncutt': '8b',
+    'pair_overlap_sethares': '9a1',
+    'pair_overlap_parncutt': '9a2',
+    'complex_overlap_sethares': '9b1',
+    'complex_overlap_parncutt': '9b2',
+    'vary_k_overlap': '10',
+    'rel_roughness_8ve_h11_sethares': '11a1',
+    'rel_roughness_8ve_h11_parncutt': '11a2',
+    'rel_roughness_8ve_e11_sethares': '11b1',
+    'rel_roughness_8ve_e11_parncutt': '11b2',
+    'different_operations_roughness_overlap': '11_app',
+    'maj7_chord': '12',
+    'add_to_triad': '13',
+    'm18m_chorale': '14',
+    'm18m_i': '15',
+    'm18m_ix': '16',
+    'high_partials_sensitivity': '17',
+    'idealized_overlap': '19',
+    'complex_roughness_helmholtz': '1b_app'
 }
 
 def save_show(name, action):
     if action.lower() == 'save':
-        title = f'ch2_fig{figure_idx[name]}.png'
+        title = f'ch2_fig{figure_idx[name]}_{name}.png'
         plt.savefig(title, dpi=350)
         print(f'{title} saved')
     
@@ -35,8 +58,8 @@ def save_show(name, action):
     plt.close()
 
 # A plot of Helmholtz’s pair-roughness function (Helmholtz 1895, appendix XV)
-def helmholtz_pair(action):
-    name = 'helmholtz_pair'
+def pair_roughness_helmholtz(action):
+    name = 'pair_roughness_helmholtz'
 
     ref_tone = SineTone(a4)
     test_tone = SineTone(a4)
@@ -159,8 +182,8 @@ def pair_roughness(action):
     save_show(name, action)
 
 # Figure 2b. Sethares + Parncutt complex roughness function
-def ch2_fig2b(action):
-    title = 'ch2_fig2b'
+def complex_roughness(action):
+    name = 'complex_roughness'
 
     # Would make sense to use `sethares_timbre` here, but it has too few partials (7)
     # for the overlap function later.
@@ -214,27 +237,22 @@ def ch2_fig2b(action):
     ax.xaxis.set_major_formatter('{x:.0f}')
     ax.yaxis.set_label_coords(-0.06, 0.5)
 
-    if action.lower() == 'save':
-        plt.savefig(f'{title}.png', dpi=350)
-        print(f'{title}.png saved')
-
-    else:
-        plt.show()
+    save_show(name, action)
 
 # Fratre graphs
 # Figure 5. HKP and Sethares roughness for Fratres chords
 # Figure 13. HKP and Sethares relative roughness for Fratres chords
-def ch2_fig5_13(action):
-    title1 = 'ch2_fig5a'
-    title2 = 'ch2_fig5b'
-    title3 = 'ch2_fig5c'
-    title4 = 'ch2_fig5d'
-    title5 = 'ch2_fig5e'
-    title15a = 'ch2_fig15a'
-    title15b = 'ch2_fig15b'
-    title15c = 'ch2_fig15c'
-    title15d = 'ch2_fig15d'   
-    title15e = 'ch2_fig15e'   
+def fratres_roughness(action):
+    name1a = 'fratres_roughness_full'
+    name1b = 'fratres_roughness_no_cb8ves'
+    name1c = 'fratres_roughness_structural'
+    name1d = 'fratres_roughness_tenths'
+    name1e = 'fratres_roughness_tenths_no8vedrone'
+    name2a = 'fratres_ratio_full'
+    name2b = 'fratres_ratio_no_cb8ves'
+    name2c = 'fratres_ratio_structural'
+    name2d = 'fratres_ratio_tenths'
+    name2e = 'fratres_ratio_tenths_no8vedrone'
     
     tim = HarrisonTimbre(11)
     fund = midi_zero
@@ -281,7 +299,6 @@ def ch2_fig5_13(action):
     # Plots
     
     # Fig 5a
-    plt.figure('5a')
     fig, ax = plt.subplots()
     fig.set_figwidth(10)
     l = len(fratres_all['sethares_roughness'])
@@ -293,14 +310,9 @@ def ch2_fig5_13(action):
     plt.ylim(ymin=0.0)
     ax.yaxis.set_label_coords(-0.06, 0.5)
     
-    if action.lower() == 'save':
-        plt.savefig(title1 + '.png', dpi=350)
-        print(title1 + '.png saved')
-    else:
-        plt.show(block=True)
+    save_show(name1a, action)
     
     # Fig 5b
-    plt.figure('5b')
     fig, ax = plt.subplots()
     fig.set_figwidth(10)
     l = len(fratres_no_cb['sethares_roughness'])
@@ -312,14 +324,9 @@ def ch2_fig5_13(action):
     plt.ylim(ymin=0.0)
     ax.yaxis.set_label_coords(-0.06, 0.5)
     
-    if action.lower() == 'save':
-        plt.savefig(title2 + '.png', dpi=350)
-        print(title2 + '.png saved')
-    else:
-        plt.show(block=True)
+    save_show(name1b, action)
     
     # Fig 5c
-    plt.figure('5c')
     fig, ax = plt.subplots()
     fig.set_figwidth(10)
     l = len(fratres_sections_start)
@@ -333,14 +340,9 @@ def ch2_fig5_13(action):
     plt.ylim(ymin=0.0, ymax=3.4)
     ax.yaxis.set_label_coords(-0.06, 0.5)
     
-    if action.lower() == 'save':
-        plt.savefig(title3 + '.png', dpi=350)
-        print(title3 + '.png saved')
-    else:
-        plt.show(block=True)
+    save_show(name1c, action)
     
     # Fig 5d
-    plt.figure('5d')
     fig, ax = plt.subplots()
     fig.set_figwidth(10)
     l = len(fratres_tenths)
@@ -352,14 +354,9 @@ def ch2_fig5_13(action):
     plt.ylim(ymin=0.0, ymax=3.4)
     ax.yaxis.set_label_coords(-0.06, 0.5)
     
-    if action.lower() == 'save':
-        plt.savefig(title4 + '.png', dpi=350)
-        print(title4 + '.png saved')
-    else:
-        plt.show(block=True)
+    save_show(name1d, action)
     
     # Fig 5e
-    plt.figure('5e')
     fig, ax = plt.subplots()
     fig.set_figwidth(10)
     l = len(fratres_tenths)
@@ -371,14 +368,9 @@ def ch2_fig5_13(action):
     plt.ylim(ymin=0.0)
     ax.yaxis.set_label_coords(-0.06, 0.5)
     
-    if action.lower() == 'save':
-        plt.savefig(title5 + '.png', dpi=350)
-        print(title5 + '.png saved')
-    else:
-        plt.show(block=True)
+    save_show(name1e, action)
     
     # Fig 15a
-    plt.figure('15a')
     fig, ax = plt.subplots()
     fig.set_figwidth(10)
     l = len(fratres_all['sethares_ratio'])
@@ -390,15 +382,9 @@ def ch2_fig5_13(action):
     plt.ylim(ymin=0.0)
     ax.yaxis.set_label_coords(-0.06, 0.5)
     
-    if action.lower() == 'save':
-        plt.savefig(title15a + '.png', dpi=350)
-        print(title15a + '.png saved')
-    
-    else:
-        plt.show(block=False)
+    save_show(name2a, action)
     
     # Fig 15b
-    plt.figure('15b')
     fig, ax = plt.subplots()
     fig.set_figwidth(10)
     l = len(fratres_no_cb['sethares_roughness'])
@@ -410,14 +396,9 @@ def ch2_fig5_13(action):
     plt.ylim(ymin=0.0)
     ax.yaxis.set_label_coords(-0.06, 0.5)
     
-    if action.lower() == 'save':
-        plt.savefig(title15b + '.png', dpi=350)
-        print(title15b + '.png saved')
-    else:
-        plt.show(block=True)
+    save_show(name2b, action)
     
     # Fig 15c
-    plt.figure('15c')
     fig, ax = plt.subplots()
     fig.set_figwidth(10)
     l = len(fratres_sections_start)
@@ -431,14 +412,9 @@ def ch2_fig5_13(action):
     plt.ylim(ymin=0.0, ymax=3.4)
     ax.yaxis.set_label_coords(-0.06, 0.5)
     
-    if action.lower() == 'save':
-        plt.savefig(title15c + '.png', dpi=350)
-        print(title15c + '.png saved')
-    else:
-        plt.show(block=True)
+    save_show(name2c, action)
     
     # Fig 15d
-    plt.figure('15d')
     fig, ax = plt.subplots()
     fig.set_figwidth(10)
     l = len(fratres_tenths)
@@ -450,14 +426,9 @@ def ch2_fig5_13(action):
     plt.ylim(ymin=0.0, ymax=3.4)
     ax.yaxis.set_label_coords(-0.06, 0.5)
     
-    if action.lower() == 'save':
-        plt.savefig(title15d + '.png', dpi=350)
-        print(title15d + '.png saved')
-    else:
-        plt.show(block=True)
+    save_show(name2d, action)
     
     # Fig 15e
-    plt.figure('15e')
     fig, ax = plt.subplots()
     fig.set_figwidth(10)
     l = len(fratres_tenths)
@@ -469,15 +440,11 @@ def ch2_fig5_13(action):
     plt.ylim(ymin=0.0)
     ax.yaxis.set_label_coords(-0.06, 0.5)
     
-    if action.lower() == 'save':
-        plt.savefig(title15e + '.png', dpi=350)
-        print(title15e + '.png saved')
-    else:
-        plt.show(block=True)
+    save_show(name2e, action)
 
 # Figure 6. Discrepancies between HKP/S roughness and dissonance.
-def ch2_fig6(action):
-    title = 'ch2_fig6'
+def cardinality_proximity(action):
+    name = 'cardinality_proximity'
 
     tim = HarrisonTimbre(11)
     fund = c4
@@ -569,16 +536,11 @@ def ch2_fig6(action):
     fig.add_artist(plt.Text(0.02, 0.75, '(a)', size=16.0, weight='bold'))
     fig.add_artist(plt.Text(0.02, 0.25, '(b)', size=16.0, weight='bold'))
 
-    if action.lower() == 'save':
-        plt.savefig(f'{title}.png', dpi=350)
-        print(f'{title}.png saved')
+    save_show(name, action)
 
-    else:
-        plt.show()
-
-# Figure 7. Octave drift and correction in S and HKP roughness.
-def ch2_fig7a(action):
-    title = 'ch2_fig7a'
+# More partials in the lower tone can reduce the proximity effect (Sethares)
+def octave_drift_sethares(action):
+    name = 'octave_drift_sethares'
 
     ref_tone_short = HarrisonTone(11)
     ref_tone_long = HarrisonTone(22)
@@ -601,14 +563,11 @@ def ch2_fig7a(action):
     ax.xaxis.set_major_formatter('{x:.0f}')
     ax.yaxis.set_label_coords(-0.06, 0.5)
 
-    if action.lower() == 'save':
-        plt.savefig(f'{title}.png', dpi=350)
-        print(f'{title}.png saved')
-    else:
-        plt.show()
+    save_show(name, action)
 
-def ch2_fig7b(action):
-    title = 'ch2_fig7b'
+# More partials in the lower tone can reduce the proximity effect (Parncutt)
+def octave_drift_parncutt(action):
+    name = 'octave_drift_parncutt'
 
     ref_tone_short = HarrisonTone(11)
     ref_tone_long = HarrisonTone(22)
@@ -631,15 +590,11 @@ def ch2_fig7b(action):
     ax.xaxis.set_major_formatter('{x:.0f}')
     ax.yaxis.set_label_coords(-0.06, 0.5)
 
-    if action.lower() == 'save':
-        plt.savefig(f'{title}.png', dpi=350)
-        print(f'{title}.png saved')
-    else:
-        plt.show()
+    save_show(name, action)
 
-# Figure 8a. Pair-overlap curve.
-def ch2_fig8a1(action):
-    title = 'ch2_fig8a1'
+# Pair-overlap curve (Sethares-like)
+def pair_overlap_sethares(action):
+    name = 'pair_overlap'
 
     ref_tone = SineTone(a4)
     test_tone = SineTone(a4)
@@ -689,14 +644,11 @@ def ch2_fig8a1(action):
     plt.subplots_adjust(left=0.15)
     ax.yaxis.set_label_coords(-0.13, 0.5)
 
-    if action.lower() == 'save':
-        plt.savefig(f'{title}.png', dpi=350)
-        print(f'{title}.png saved')
-    else:
-        plt.show()
-        
-def ch2_fig8a2(action):
-    title = 'ch2_fig8a2'
+    save_show(name, action)
+
+# Pair-overlap curve (Parncutt-like)
+def pair_overlap_parncutt(action):
+    name = 'pair_overlap_parncutt'
 
     ref_tone = SineTone(a4)
     test_tone = SineTone(a4)
@@ -744,15 +696,11 @@ def ch2_fig8a2(action):
     plt.subplots_adjust(left=0.15)
     ax.yaxis.set_label_coords(-0.13, 0.5)
 
-    if action.lower() == 'save':
-        plt.savefig(f'{title}.png', dpi=350)
-        print(f'{title}.png saved')
-    else:
-        plt.show()
+    save_show(name, action)
 
-# Fi6ure 8b. Complex overlap curve.
-def ch2_fig8b1(action):
-    title = 'ch2_fig8b1'
+# Complex overlap curve (Sethares-like)
+def complex_overlap_sethares(action):
+    name = 'complex_overlap_sethares'
 
     ref_tone = HarrisonTone(11, a3)
     test_tone = HarrisonTone(11, a3)
@@ -801,14 +749,11 @@ def ch2_fig8b1(action):
     ax.xaxis.set_major_formatter('{x:.0f}')
     ax.yaxis.set_label_coords(-0.06, 0.5)
 
-    if action.lower() == 'save':
-        plt.savefig(f'{title}.png', dpi=350)
-        print(f'{title}.png saved')
-    else:
-        plt.show()
-    
-def ch2_fig8b2(action):
-    title = 'ch2_fig8b2'
+    save_show(name, action)
+
+# Complex overlap curve (Parncutt-like)
+def complex_overlap_parncutt(action):
+    name = 'complex_overlap_parncutt'
 
     ref_tone = HarrisonTone(11, a3)
     test_tone = HarrisonTone(11, a3)
@@ -855,18 +800,15 @@ def ch2_fig8b2(action):
     ax.xaxis.set_major_formatter('{x:.0f}')
     ax.yaxis.set_label_coords(-0.06, 0.5)
 
-    if action.lower() == 'save':
-        plt.savefig(f'{title}.png', dpi=350)
-        print(f'{title}.png saved')
-    else:
-        plt.show()
+    save_show(name, action)
 
-def ch2_fig9(action):
-    title = 'ch2_fig9'
+# Effects of varying slope of overlap curve
+def vary_k_overlap(action):
+    name = 'vary_k_overlap'
 
-    ref_tone = HarrisonTone(11)
-    test_tone = HarrisonTone(11)
     fund = a3
+    ref_tone = HarrisonTone(11, fund)
+    test_tone = HarrisonTone(11, fund)
     T = one_octave
     # T = TransposeDomain(-0.5, 12.5, 200, 'ST_DIFF')
 
@@ -920,15 +862,11 @@ def ch2_fig9(action):
     fig.add_artist(plt.Text(0.03, 0.75, '(a)', size=16.0, weight='bold'))
     fig.add_artist(plt.Text(0.03, 0.25, '(b)', size=16.0, weight='bold'))
 
-    if action.lower() == 'save':
-        plt.savefig(f'{title}.png', dpi=350)
-        print(f'{title}.png saved')
-    else:
-        plt.show()
+    save_show(name, action)
 
-# Figure 10. Plot of relative roughness over 1 octave, above A3.
-def ch2_fig10a1(action):
-    title = 'ch2_fig10a1'
+# Plot of Sethares-like relative roughness over 1 octave, above A3, H(11) tone.
+def rel_roughness_8ve_h11_sethares(action):
+    name = 'rel_roughness_8ve_h11_sethares'
 
     ref_tone = HarrisonTone(11, a3)
     test_tone = HarrisonTone(11, a3)
@@ -985,14 +923,11 @@ def ch2_fig10a1(action):
     ax.xaxis.set_major_formatter('{x:.0f}')
     ax.yaxis.set_label_coords(-0.06, 0.5)
 
-    if action.lower() == 'save':
-        plt.savefig(f'{title}.png', dpi=350)
-        print(f'{title}.png saved')
-    else:
-        plt.show()
+    save_show(name, action)
 
-def ch2_fig10a2(action):
-    title = 'ch2_fig10a2'
+# Plot of Parncutt-like relative roughness over one octave, above A3, H(11) tone.
+def rel_roughness_8ve_h11_parncutt(action):
+    name = 'rel_roughness_8ve_h11_parncutt'
 
     ref_tone = HarrisonTone(11, a3)
     test_tone = HarrisonTone(11, a3)
@@ -1053,8 +988,9 @@ def ch2_fig10a2(action):
     else:
         plt.show()
 
-def ch2_fig10b1(action):
-    title = 'ch2_fig10b1'
+# Plot of Sethares-like relative roughness over one octave, above A3, E(11) tone.
+def rel_roughness_8ve_e11_sethares(action):
+    name = 'rel_roughness_8ve_e11_sethares'
 
     ref_tone = SetharesTone(11, a3)
     test_tone = SetharesTone(11, a3)
@@ -1111,14 +1047,11 @@ def ch2_fig10b1(action):
     ax.xaxis.set_major_formatter('{x:.0f}')
     ax.yaxis.set_label_coords(-0.06, 0.5)
 
-    if action.lower() == 'save':
-        plt.savefig(f'{title}.png', dpi=350)
-        print(f'{title}.png saved')
-    else:
-        plt.show()
+    save_show(name, action)
 
-def ch2_fig10b2(action):
-    title = 'ch2_fig10b2'
+# Plot of Parncutt-like relative roughness over one octave, above A3, E(11) tone.
+def rel_roughness_8ve_e11_parncutt(action):
+    name = 'rel_roughness_8ve_e11_parncutt'
 
     ref_tone = SetharesTone(11, a3)
     test_tone = SetharesTone(11, a3)
@@ -1173,14 +1106,12 @@ def ch2_fig10b2(action):
     ax.xaxis.set_major_formatter('{x:.0f}')
     ax.yaxis.set_label_coords(-0.06, 0.5)
 
-    if action.lower() == 'save':
-        plt.savefig(f'{title}.png', dpi=350)
-        print(f'{title}.png saved')
-    else:
-        plt.show()
+    save_show(name, action)
 
-def ch2_fig10_app(action):
-    title = 'ch2_fig10_app'
+# Sethares-like relative-roughness curve of H(11) tones over one 8ve,
+# along with some other operations on the roughness and overlap curves.
+def different_operations_roughness_overlap(action):
+    name = 'different_operations_roughness_overlap'
 
     ref_tone = HarrisonTone(11)
     test_tone = HarrisonTone(11)
@@ -1250,17 +1181,13 @@ def ch2_fig10_app(action):
     ax.xaxis.set_major_formatter('{x:.0f}')
     ax.yaxis.set_label_coords(-0.06, 0.5)
 
-    if action.lower() == 'save':
-        plt.savefig(f'{title}.png', dpi=350)
-        print(f'{title}.png saved')
-    else:
-        plt.show()
+    save_show(name, action)
 
 
 
-# Figure 11. Relative roughnesses of a major seventh chord and its subsets.
-def ch2_fig11(action):
-    title = 'ch2_fig11'
+# Relative roughnesses of a major seventh chord and its subsets.
+def maj7_chord(action):
+    name = 'maj7_chord'
 
     # tim = HarrisonTimbre(11)
     tim = SetharesTimbre(11)
@@ -1328,14 +1255,11 @@ def ch2_fig11(action):
     # ax[1].tick_params(axis='x', labelrotation=90)
     plt.subplots_adjust(bottom=0.3)
 
-    if action.lower() == 'save':
-        plt.savefig(f'{title}.png', dpi=350)
-        print(f'{title}.png saved')
-    else:
-        plt.show()
+    save_show(name, action)
 
-def ch2_fig12(action):
-    title = 'ch2_fig12'
+# Adding one note to a triad
+def add_to_triad(action):
+    name = 'add_to_triad'
 
     ref_triad = HarrisonMajTriad(11, a3)
     test_tone = HarrisonTone(11, a3)
@@ -1393,14 +1317,11 @@ def ch2_fig12(action):
     for point in triad_added:
         ax.plot(point[0], point[1], 'd', ms=20, mew=2, mfc='none', mec='k')
 
-    if action.lower() == 'save':
-        plt.savefig(f'{title}.png', dpi=350)
-        print(f'{title}.png saved')
-    else:
-        plt.show()
+    save_show(name, action)
 
-def ch2_fig14(action):
-    title = 'ch2_fig14'
+# Music for 18 Musicians chorale
+def m18m_chorale(action):
+    name = 'm18m_chorale'
 
     tim = HarrisonTimbre(11)
     fund = midi_zero
@@ -1437,14 +1358,11 @@ def ch2_fig14(action):
     plt.ylim(ymin=0.0)
     ax.yaxis.set_label_coords(-0.06, 0.5)
 
-    if action.lower() == 'save':
-        plt.savefig(f'{title}.png', dpi=350)
-        print(f'{title}.png saved')
-    else:
-        plt.show()
+    save_show(name, action)
 
-def ch2_fig15a(action):
-    title = 'ch2_fig15a'
+# Music for 18 Musicians, Section I
+def m18m_i(action):
+    name = 'm18m_i'
 
     tim = HarrisonTimbre(11)
     fund_i = d4
@@ -1479,14 +1397,11 @@ def ch2_fig15a(action):
     plt.ylim(ymin=0.5, ymax=1.5)
     ax.yaxis.set_label_coords(-0.06, 0.5)
 
-    if action.lower() == 'save':
-        plt.savefig(f'{title}.png', dpi=350)
-        print(f'{title}.png saved')
-    else:
-        plt.show()
+    save_show(name, action)
 
-def ch2_fig15b(action):
-    title = 'ch2_fig15b'
+# Music for 18 Musicians, Section IX
+def m18m_ix(action):
+    name = 'm18m_ix'
 
     tim = HarrisonTimbre(11)
     fund_ix = midi_zero
@@ -1512,16 +1427,11 @@ def ch2_fig15b(action):
     ax.yaxis.set_label_coords(-0.1, 0.5)
     plt.subplots_adjust(left=0.16)
 
+    save_show(name, action)
 
-    if action.lower() == 'save':
-        plt.savefig(f'{title}.png', dpi=350)
-        print(f'{title}.png saved')
-    else:
-        plt.show()
-
-# Figure 16. Sensitivity of relative roughness to presence of higher partials.
-def ch2_fig16(action):
-    title = 'ch2_fig16'
+# Sensitivity of relative roughness to presence of higher partials.
+def high_partials_sensitivity(action):
+    name = 'high_partials_sensitivity'
 
     ref_8 = HarrisonTone(8)
     test_8 = HarrisonTone(8)
@@ -1568,14 +1478,11 @@ def ch2_fig16(action):
     fig.add_artist(plt.Text(0.03, 0.75, '(a)', size=16.0, weight='bold'))
     fig.add_artist(plt.Text(0.03, 0.25, '(b)', size=16.0, weight='bold'))
 
-    if action.lower() == 'save':
-        plt.savefig(f'{title}.png', dpi=350)
-        print(f'{title}.png saved')
-    else:
-        plt.show()
+    save_show(name, action)
 
-def ch2_fig18(action):
-    title = 'ch2_fig18'
+# Idealized overlap function using a flat-saw timbre
+def idealized_overlap(action):
+    name = 'idealized_overlap'
 
     maxDenom = 12
 
@@ -1590,8 +1497,8 @@ def ch2_fig18(action):
                 overlap_ideal.append(1 / float(num))
 
     # Reference
-    ref_tone = FlatSawTone(12)
-    test_tone = FlatSawTone(12)
+    ref_tone = FlatSawTone(11)
+    test_tone = FlatSawTone(11)
     T = TransposeDomain(1.0, 2.0, 1000, 'SCALE_FACTOR')
 
     overlap = overlap_curve(
@@ -1622,22 +1529,15 @@ def ch2_fig18(action):
     ax.xaxis.set_major_formatter('{x:.1f}')
     ax.yaxis.set_label_coords(-0.1, 0.5)
 
-    if action.lower() == 'save':
-        plt.savefig(f'{title}.png', dpi=350)
-        print(f'{title}.png saved')
-    else:
-        plt.show()
-
-
-
+    save_show(name, action)
 
 ##########################
 #### APPENDIX FIGURES ####
 ##########################
 
-# Figure 1b, appendix. My attempt to implement Helmholtz’s composite function.
-def ch2_fig1b_appendix(action):
-    title = 'ch2_fig1b_app'
+# My attempt to implement Helmholtz’s composite function.
+def complex_roughness_helmholtz(action):
+    name = 'complex_roughness_helmholtz'
 
     roughnesses = []
 
@@ -1674,14 +1574,7 @@ def ch2_fig1b_appendix(action):
     ax.xaxis.set_major_formatter('{x:.0f}')
     ax.yaxis.set_label_coords(-0.06, 0.5)
 
-    if action.lower() == 'save':
-        plt.savefig(f'{title}.png',dpi=350)
-        print(f'{title}.png saved')
-
-    else:
-        plt.show()
-
-
+    save_show(name, action)
 
 
 def __main__(argv):
@@ -1690,29 +1583,32 @@ def __main__(argv):
         action = argv[1].lower()
 
     # helmholtz_pair(action)
-    timbre_plots(action)
-    # ch2_fig2a(action)
-    # ch2_fig2b(action)
-    # ch2_fig5_15(action)
-    # ch2_fig6(action)
-    # ch2_fig7a(action)
-    # ch2_fig7b(action)
-    # ch2_fig8a1(action)
-    # ch2_fig8a2(action)
-    # ch2_fig8b1(action)
-    # ch2_fig8b2(action)
-    # ch2_fig9(action)
-    # ch2_fig10a1(action)
-    # ch2_fig10a2(action)
-    # ch2_fig10b1(action)
-    # ch2_fig10b2(action)
-    # ch2_fig11(action)
-    # ch2_fig12(action)
-    # ch2_fig13(action)
-    # ch2_fig14a(action)
-    # ch2_fig14b(action)
-    # ch2_fig16(action)
-    # ch2_fig18(action)
+    # timbre_plots(action)
+    # pair_roughness(action)
+    # complex_roughness(action)
+    # fratres_roughness(action)
+    # cardinality_proximity(action)
+    # octave_drift_sethares(action)
+    # octave_drift_parncutt(action)
+    # pair_overlap_sethares(action)
+    # pair_overlap_parncutt(action)
+    # complex_overlap_sethares(action)
+    # complex_overlap_parncutt(action)
+    # vary_k_overlap(action)
+    # rel_roughness_8ve_h11_sethares(action)
+    # rel_roughness_8ve_h11_parncutt(action)
+    # rel_roughness_8ve_e11_sethares(action)
+    # rel_roughness_8ve_e11_parncutt(action)
+    # different_operations_roughness_overlap(action)
+    # maj7_chord(action)
+    # add_to_triad(action)
+    # m18m_chorale(action)
+    # m18m_i(action)
+    # m18m_ix(action)
+    # high_partials_sensitivity(action)
+    # idealized_overlap(action)
+    # complex_roughness_helmholtz(action)
+
     plt.close('all')
 
 if __name__ == '__main__':
