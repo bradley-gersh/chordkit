@@ -18,8 +18,8 @@ from chord_lists import (fratres_8vedrone_nocb8ves, fratres_8vedrone_cb8va,
 
 
 figure_idx = {
-    'helmholtz_pair': '1a',
-    'timbre_plots': '2',
+    'timbre_plots': '1',
+    'helmholtz_pair': '2a',
     'pair_roughness': '3a',
     'complex_roughness': '3b', # add on from here
     'fratres_roughness': '6',
@@ -96,19 +96,21 @@ def pair_roughness_helmholtz(action):
 def timbre_plots(action):
     name = 'timbre_plots'
     
+    f_tim = FlatSawTimbre(11)
     h_tim = HarrisonTimbre(11)
     s_tim = SetharesTimbre(11)
     fund = 1
 
-    h = ChordSpectrum([0], 'ST_DIFF', timbre=h_tim, fund_hz=fund)
+    f = ChordSpectrum([0], 'ST_DIFF', timbre=f_tim, fund_hz=fund)
     s = ChordSpectrum([0], 'ST_DIFF', timbre=s_tim, fund_hz=fund)
+    h = ChordSpectrum([0], 'ST_DIFF', timbre=h_tim, fund_hz=fund)
 
     f0 = r'$\mathsf{f_0}$'
     freqs = [f0] + [str(x) + f0 for x in range(2, 12)]
     
     # Plot
-    fig, ax = plt.subplots(1, 2, figsize=(12, 4))
-    plt.subplots_adjust(wspace=0.3, hspace=0.7)
+    fig, ax = plt.subplots(1, 3, figsize=(15, 4))
+    plt.subplots_adjust(wspace=0.3, hspace=0.5)
     for panel in ax:
         panel.spines['right'].set_visible(False)
         panel.spines['top'].set_visible(False)
@@ -117,13 +119,17 @@ def timbre_plots(action):
         panel.set_ylabel('amplitude\n(arbitrary units)')
         panel.set_xlabel('frequency (Hz)')
 
-    ax[0].stem(freqs, h.partials['amp'], linefmt='k', markerfmt='ko', basefmt=' ')
-    ax[0].set_title('H(11)')
+    ax[0].stem(freqs, f.partials['amp'], linefmt='k', markerfmt='ko', basefmt=' ')
+    ax[0].set_title('F(11)', size=16.0)
     ax[1].stem(freqs, s.partials['amp'], linefmt='k', markerfmt='ko', basefmt=' ')
-    ax[1].set_title(r'E$_{\mathsf{0.88}}$(11)', usetex=True)
+    ax[1].set_title(r'E$_{\mathsf{0.88}}$(11)', usetex=True, size=16.0)
+    ax[2].stem(freqs, h.partials['amp'], linefmt='k', markerfmt='ko', basefmt=' ')
+    ax[2].set_title('H(11)', size=16.0)
     
-    fig.add_artist(plt.Text(0.05, 0.8, '(a)', size=16.0, weight='bold'))
-    fig.add_artist(plt.Text(0.5, 0.8, '(b)', size=16.0, weight='bold'))
+    fig.add_artist(plt.Text(0.01, 0.9, '(a)', size=16.0, weight='bold'))
+    fig.add_artist(plt.Text(0.33, 0.9, '(b)', size=16.0, weight='bold'))
+    fig.add_artist(plt.Text(0.67, 0.9, '(c)', size=16.0, weight='bold'))
+    fig.tight_layout()
 
     save_show(name, action)
 
@@ -1578,8 +1584,8 @@ def __main__(argv):
     if len(argv) > 1:
         action = argv[1].lower()
 
-    # helmholtz_pair(action)
     # timbre_plots(action)
+    # helmholtz_pair(action)
     # pair_roughness(action)
     # complex_roughness(action)
     # fratres_roughness(action)
