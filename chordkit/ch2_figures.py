@@ -982,11 +982,7 @@ def rel_roughness_8ve_h11_parncutt(action):
     ax.xaxis.set_major_formatter('{x:.0f}')
     ax.yaxis.set_label_coords(-0.06, 0.5)
 
-    if action.lower() == 'save':
-        plt.savefig(f'{title}.png', dpi=350)
-        print(f'{title}.png saved')
-    else:
-        plt.show()
+    save_show(name, action)
 
 # Plot of Sethares-like relative roughness over one octave, above A3, E(11) tone.
 def rel_roughness_8ve_e11_sethares(action):
