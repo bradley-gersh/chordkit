@@ -1,4 +1,7 @@
+from typing import Dict
+
 import numpy as np
+from numpy.typing import ArrayLike
 import matplotlib.pyplot as plt
 import defaults as de
 from roughness_models import roughness_complex
@@ -12,14 +15,14 @@ def overlap_curve(
     transpose_domain: TransposeDomain = de.default_transpose_domain,
     function_type: str = de.default_overlap_function_type,
     normalize: bool = False,
-    options = {
+    options: Dict = {
         'crossterms_only': False,
         'amp_type': 'MIN',
         'cutoff': False,
         'original': False,
         'show_partials': False
     }
-):
+) -> ArrayLike:
 
     overlap_vals = np.zeros(np.shape(transpose_domain.domain))
 
@@ -75,14 +78,14 @@ def roughness_curve(
     function_type: str = de.default_roughness_function_type,
     normalize: bool = False,
     plot: bool = False,
-    options = {
+    options: Dict = {
         'crossterms_only': False,
         'amp_type': 'MIN',
         'cutoff': False,
         'original': False,
         'show_partials': False
     }
-):
+) -> ArrayLike:
 
     # Using Sethares' original function. Note that incorporating crossterms only
     # (i.e. interactions between the two chords, not roughness relations of

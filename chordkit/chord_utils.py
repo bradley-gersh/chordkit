@@ -18,7 +18,7 @@ class Timbre:
     def copy(self):
         return Timbre(list(self.partials['fund_multiple']), list(self.partials['amp']))
 
-def sort_partials(partials: pd.DataFrame):
+def sort_partials(partials: pd.DataFrame) -> pd.DataFrame:
     return partials.reindex(['hz', 'amp', 'note_id', 'fund_multiple', 'hz_orig'], axis=1).sort_values(by = 'hz', ignore_index = True)
 
 class MergedSpectrum:
@@ -82,7 +82,7 @@ class ChordSpectrum:
         self.partials = sort_partials(self.partials)
 
     # Generate a new note for the chord, based on the chord_struct_type
-    def add_note_hz(self, note_hz):
+    def add_note_hz(self, note_hz: float) -> float:
         # chord_struct defines intervals by semitone difference
         if self.struct_type.upper() == 'ST_DIFF':
             return 2 ** (note_hz / 12) * self.ref_tone.partials['hz']
@@ -97,16 +97,16 @@ class ChordSpectrum:
         else:
             raise ValueError(f'invalid chord structure type: {self.struct_type}')
 
-    def reset_partials(self):
+    def reset_partials(self) -> None:
         self.set_fund_hz(self.fund_hz_orig)
         self.partials['hz'] = self.partials['hz_orig']
 
-    def set_fund_hz(self, new_fund_hz: float):
+    def set_fund_hz(self, new_fund_hz: float) -> None:
         self.fund_hz = new_fund_hz
         self.partials['hz'] = self.partials['fund_multiple'] * new_fund_hz
 
     # Update chord's frequency table to reflect a transposition
-    def transpose(self, position: float, transpose_type: str):
+    def transpose(self, position: float, transpose_type: str) -> None:
         if transpose_type.upper() != self.struct_type.upper():
             Warning('chord structure type does not match transposition type')
 
@@ -125,13 +125,13 @@ class ChordSpectrum:
 
 
     # Display a stem plot of the chord
-    def plot(self):
+    def plot(self) -> None:
         plt.stem(self.partials['hz'], self.partials['amp'])
         plt.show()
 
 
 class TransposeDomain:
-    def __init__(self, low_bound, high_bound, steps, transpose_type):
+    def __init__(self, low_bound: float or int, high_bound: float or int, steps: int, transpose_type: str):
         self.domain = np.linspace(low_bound, high_bound, num=steps)
         self.transpose_type = transpose_type
 

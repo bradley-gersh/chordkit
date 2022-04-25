@@ -1645,7 +1645,7 @@ def __main__(argv):
     # fratres_roughness(action)
     # cardinality_proximity(action)
     # octave_drift_sethares(action)
-    # octave_drift_parncutt(action)
+    octave_drift_parncutt(action)
     # pair_overlap_sethares(action)
     # pair_overlap_parncutt(action)
     # complex_overlap_sethares(action)
