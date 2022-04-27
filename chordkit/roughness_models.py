@@ -1,7 +1,7 @@
 import numpy as np
 from hearing_models import cbw_volk, cbw_hutchinson
 from pair_constants import SETHARES_CONSTANTS as sc, AUDITORY_CONSTANTS as ac, pair_volume, pair_distance
-from chord_utils import MergedSpectrum
+from chord_utils import MergedSpectrum, ChordSpectrum
 
 # This file contains both the individual pairwise models used for assessing the
 # roughness of partial pairs and the summing function that adds up all such
@@ -53,16 +53,19 @@ def sethares_roughness_pair(x_hz, ref_hz, v_x, v_ref, *, options = {
     v12 = pair_volume(v_x, v_ref, options['amp_type'])
 
     # Sethares' MATLAB implementation (but not the published paper)
-    scaling = 5
+    # scaling = 5
+    
+    # For agreement with Harrison and Pearce (2020), I am removing the
+    # scaling factor.
+    scaling = 1
 
     # The following scaling factor is introduced to ensure that the maximum
     # value obtained by the pairwise roughness function is approximately 1.
     # The numerator comes from Sethares' MATLAB implementation; the
     # denominator is my additional modification.
-    if options['original'] == False:
-        scaling = 5 / 0.8986
+    # if options['original'] == False:
+        # scaling = 5 / 0.8986
 
-    # distance = pair_distance(x_hz, ref_hz)
     distance = np.abs(x_hz - ref_hz)
 
     # Cutoff: Following Hutchinson and Knopoff 1978, cuts off the Sethares
@@ -95,18 +98,19 @@ def cbw_roughness_pair(x_hz, ref_hz, v_x, v_ref, options={ 'amp_type': 'MIN' }):
 # From Hutchinson and Knopoff 1978 and Bigand, Parncutt, and Lerdahl 1996.
 def parncutt_roughness_pair(x_hz, ref_hz, v_x, v_ref, options = {}):
     # Parameters asserted in BPL 1996 paper
+    max_distance = 1.2
     a = 0.25
     i_factor = 2
 
     freq_difference = abs(x_hz - ref_hz)
-    freq_median = (x_hz + ref_hz) / 2
-    freq_median_cbw = cbw_hutchinson(freq_median)
-    distance = freq_difference / freq_median_cbw
+    freq_avg = (x_hz + ref_hz) / 2
+    freq_avg_cbw = cbw_hutchinson(freq_avg)
+    distance = freq_difference / freq_avg_cbw
 
     # Volume scaling (cf. Hutchinson and Knopoff 1978, 3)
-    amp = v_x * v_ref / (v_x * v_x + v_ref * v_ref)
-
-    if distance < 1.2:
+    amp = v_x * v_ref
+    
+    if distance <= max_distance:
         return amp * (((np.exp(1)/a) * distance * np.exp(-distance / a)) ** i_factor)
     else:
         return 0
@@ -119,7 +123,7 @@ def parncutt_roughness_pair(x_hz, ref_hz, v_x, v_ref, options = {}):
 # all pairwise contributions to roughness. It can use any of the other
 # pairwise roughness evaluation functions.
 def roughness_complex(
-    spectrum: MergedSpectrum,
+    spectrum: MergedSpectrum or ChordSpectrum,
     function_type: str = 'SETHARES',
     rough_limit: float = 0.1,
     *,
@@ -136,12 +140,18 @@ def roughness_complex(
 
     if function_type.upper() == 'SETHARES':
         pair_assess = sethares_roughness_pair
+        denom = 1
     elif function_type.upper() == 'CBW':
         pair_assess = cbw_roughness_pair
+        denom = 1
     elif function_type.upper() == 'PARNCUTT':
         pair_assess = parncutt_roughness_pair
+        # Hutchinson and Knopoff (1979, 6) use a single scaling
+        # denominator across the entire sum.
+        denom = np.sum(spectrum.partials['amp'] ** 2)
     elif function_type.upper() == 'HELMHOLTZ':
         pair_assess = helmholtz_roughness_pair
+        denom = 1
     else:
         raise ValueError(f'Invalid assessment function type: {function_type.upper()}')
 
@@ -185,5 +195,5 @@ def roughness_complex(
             'roughness': np.sum(rough_vals),
             'rough_partials': rough_partials
         }
-
-    return np.sum(rough_vals)
+    
+    return np.sum(rough_vals) / denom
